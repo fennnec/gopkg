@@ -81,3 +81,12 @@ func ExampleSortInterface() {
 	// Output:
 	// [2 25 56 88 100]
 }
+
+func ExampleMapSlice() {
+	a := MapSlice([]float32{1, 2, 3, 4}, func(val interface{}) interface{} {
+		return val.(float32) * 2
+	})
+	fmt.Printf("%T: %v\n", a, a)
+	// Output:
+	// []float32: [2 4 6 8]
+}
