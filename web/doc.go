@@ -12,7 +12,7 @@ Example
 	package main
 
 	import (
-		"code.google.com/p/chai2010.gopkg/web"
+		"github.com/chai2010/gopkg/web"
 	)
 
 	func hello(val string) string { return "hello " + val }
@@ -27,7 +27,7 @@ Getting parameters
 	package main
 
 	import (
-		"code.google.com/p/chai2010.gopkg/web"
+		"github.com/chai2010/gopkg/web"
 	)
 
 	func hello(ctx *web.Context, val string) {
@@ -41,7 +41,8 @@ Getting parameters
 		web.Run("0.0.0.0:9999")
 	}
 
-In this example, if you visit `http://localhost:9999/?a=1&b=2`, you'll see the following printed out in the terminal:
+In this example, if you visit `http://localhost:9999/?a=1&b=2`,
+you'll see the following printed out in the terminal:
 
 	a 1
 	b 2

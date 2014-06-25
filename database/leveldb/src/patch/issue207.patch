@@ -1,0 +1,18 @@
+ db/c.cc | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/db/c.cc b/db/c.cc
+index 08ff0ad..8247b57 100644
+--- a/db/c.cc
++++ b/db/c.cc
+@@ -208,9 +208,7 @@ char* leveldb_get(
+     result = CopyString(tmp);
+   } else {
+     *vallen = 0;
+-    if (!s.IsNotFound()) {
+-      SaveError(errptr, s);
+-    }
++    SaveError(errptr, s);
+   }
+   return result;
+ }

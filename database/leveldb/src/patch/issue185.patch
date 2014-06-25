@@ -1,0 +1,53 @@
+ db/c.cc             | 5 ++++-
+ include/leveldb/c.h | 1 +
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/db/c.cc b/db/c.cc
+index 08ff0ad..ec9e05b 100644
+--- a/db/c.cc
++++ b/db/c.cc
+@@ -92,6 +92,7 @@ struct leveldb_filterpolicy_t : public FilterPolicy {
+       const char* const* key_array, const size_t* key_length_array,
+       int num_keys,
+       size_t* filter_length);
++  void (*free_)(void*);
+   unsigned char (*key_match_)(
+       void*,
+       const char* key, size_t length,
+@@ -115,7 +116,7 @@ struct leveldb_filterpolicy_t : public FilterPolicy {
+     size_t len;
+     char* filter = (*create_)(state_, &key_pointers[0], &key_sizes[0], n, &len);
+     dst->append(filter, len);
+-    free(filter);
++    (*free_)(filter);
+   }
+ 
+   virtual bool KeyMayMatch(const Slice& key, const Slice& filter) const {
+@@ -478,6 +479,7 @@ leveldb_filterpolicy_t* leveldb_filterpolicy_create(
+         const char* const* key_array, const size_t* key_length_array,
+         int num_keys,
+         size_t* filter_length),
++    void (*free_filter)(void*),
+     unsigned char (*key_may_match)(
+         void*,
+         const char* key, size_t length,
+@@ -487,6 +489,7 @@ leveldb_filterpolicy_t* leveldb_filterpolicy_create(
+   result->state_ = state;
+   result->destructor_ = destructor;
+   result->create_ = create_filter;
++  result->free_ = free_filter;
+   result->key_match_ = key_may_match;
+   result->name_ = name;
+   return result;
+diff --git a/include/leveldb/c.h b/include/leveldb/c.h
+index 1fa5886..9d1921b 100644
+--- a/include/leveldb/c.h
++++ b/include/leveldb/c.h
+@@ -229,6 +229,7 @@ extern leveldb_filterpolicy_t* leveldb_filterpolicy_create(
+         const char* const* key_array, const size_t* key_length_array,
+         int num_keys,
+         size_t* filter_length),
++    void (*free_filter)(void*),
+     unsigned char (*key_may_match)(
+         void*,
+         const char* key, size_t length,

@@ -1,7 +1,6 @@
 gopkg
 =====
 
-golang package
+PkgDoc: [http://godoc.org/github.com/chai2010/gopkg](http://godoc.org/github.com/chai2010/gopkg)
 
-PkgDoc:
-- gopkg/builtin: [http://godoc.org/github.com/chai2010/gopkg/builtin](http://godoc.org/github.com/chai2010/gopkg/builtin)
+Report bugs to <chaishushan{AT}gmail.com>.
