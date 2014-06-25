@@ -13,7 +13,7 @@
 //
 //  db, err := sql.Open("mysql", "user:password@/dbname")
 //
-// See https://github.com/chai2010/gopkg/database/mysql#usage for details
+// See https://github.com/chai2010/gopkg/tree/master/database/mysql#usage for details
 package mysql
 
 import (
