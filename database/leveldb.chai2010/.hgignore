@@ -1,0 +1,27 @@
+# Copyright 2013 <chaishushan{AT}gmail.com>. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
+syntax:glob
+.git
+.gitignore
+*.[568ao]
+*.a[568o]
+*.so
+[568a].out
+*~
+*.orig
+*.exe
+*.dll
+*.lib
+.*.swp
+*.cgo*.go
+*.cgo*.c
+_cgo_*
+_obj
+_test
+_testmain.go
+
+syntax:regexp
+^capi/zz_.*
+^testdb/.*
