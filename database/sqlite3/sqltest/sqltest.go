@@ -1,3 +1,5 @@
+// +build ingore
+
 package sqltest
 
 import (
