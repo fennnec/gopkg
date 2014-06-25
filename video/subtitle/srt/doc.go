@@ -10,7 +10,7 @@ How To Use
 Example:
 
 	import (
-		"chai2010.gopkg/video/subtitle/srt"
+		"github.com/chai2010/gopkg/video/subtitle/srt"
 	)
 
 	func main() {
