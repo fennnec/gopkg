@@ -6,14 +6,18 @@ project(LEVELDB)
 
 IF(WIN32)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(LEVELDB_DEF leveldb-cgo-win64.def)
     set(OS win64)
   else()
+    set(LEVELDB_DEF leveldb-cgo-win32.def)
     set(OS win32)
   endif()
 else()
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(LEVELDB_DEF leveldb-cgo-posix64.def)
     set(OS posix64)
   else()
+    set(LEVELDB_DEF leveldb-cgo-posix32.def)
     set(OS posix32)
   endif()
 endif()
@@ -69,7 +73,7 @@ set(LEVELDB_SRC
 
 add_library(leveldblib SHARED
   ${LEVELDB_SRC}
-  leveldb.def
+  ${LEVELDB_DEF}
 )
 set_target_properties(leveldblib
   PROPERTIES OUTPUT_NAME "leveldb-cgo-${OS}"
