@@ -5,6 +5,7 @@
 package builtin
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -14,6 +15,21 @@ func TestMapSlice(t *testing.T) {
 		return val.(int) * 2
 	})
 	if !reflect.DeepEqual(a, []int{2, 4, 6, 8}) {
+		t.Fatal("not equal")
+	}
+}
+
+func TestMapMap(t *testing.T) {
+	a := map[int]string{1: "A", 2: "B", 3: "C", 4: "D"}
+	b := MapMap(a, func(key, val interface{}) interface{} {
+		return fmt.Sprintf("{key(%v),val(%v)}", key.(int), val.(string))
+	})
+	c := make(map[int]string)
+
+	for k, v := range a {
+		c[k] = fmt.Sprintf("{key(%v),val(%v)}", k, v)
+	}
+	if !reflect.DeepEqual(b, c) {
 		t.Fatal("not equal")
 	}
 }

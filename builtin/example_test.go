@@ -90,3 +90,20 @@ func ExampleMapSlice() {
 	// Output:
 	// []float32: [2 4 6 8]
 }
+
+func ExampleMapMap() {
+	a := MapMap(map[int]string{1: "A", 2: "B", 3: "C", 4: "D"}, func(key, val interface{}) interface{} {
+		return fmt.Sprintf("{key(%v),val(%v)}", key.(int), val.(string))
+	})
+	fmt.Printf("%T\n", a)
+	fmt.Printf("%v\n", a.(map[int]string)[1])
+	fmt.Printf("%v\n", a.(map[int]string)[2])
+	fmt.Printf("%v\n", a.(map[int]string)[3])
+	fmt.Printf("%v\n", a.(map[int]string)[4])
+	// Output:
+	// map[int]string
+	// {key(1),val(A)}
+	// {key(2),val(B)}
+	// {key(3),val(C)}
+	// {key(4),val(D)}
+}
