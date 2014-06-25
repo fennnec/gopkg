@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// MD5验证工具
+// MD5楠岃瘉宸ュ叿
 package main
