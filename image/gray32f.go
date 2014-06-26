@@ -27,6 +27,10 @@ func (p *Gray32f) ColorModel() color.Model { return color_ext.Gray32fModel }
 func (p *Gray32f) Bounds() image.Rectangle { return p.Rect }
 
 func (p *Gray32f) At(x, y int) color.Color {
+	return p.Gray32fAt(x, y)
+}
+
+func (p *Gray32f) Gray32fAt(x, y int) color_ext.Gray32f {
 	if !(image.Point{x, y}.In(p.Rect)) {
 		return color_ext.Gray32f{}
 	}
