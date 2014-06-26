@@ -5,12 +5,12 @@
 package jxr
 
 import (
+	"errors"
+	"image"
 	"io"
-
-	"github.com/chai2010/gopkg.image"
 )
 
 // Encode writes the image m to w in JPEG/XR format.
 func Encode(w io.Writer, m image.Image) error {
-	return ErrUnsupported
+	return errors.New("jxr: unsupported JPEG/XR image")
 }

@@ -6,11 +6,10 @@ package jxr
 
 import (
 	"bytes"
+	"image"
 	"io/ioutil"
 	"os"
 	"testing"
-
-	"github.com/chai2010/gopkg.image"
 )
 
 func openImage(filename string) (image.Image, error) {

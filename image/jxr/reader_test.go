@@ -5,11 +5,10 @@
 package jxr
 
 import (
+	"image"
+	_ "image/png"
 	"os"
 	"testing"
-
-	"github.com/chai2010/gopkg.image"
-	_ "github.com/chai2010/gopkg.image/png"
 )
 
 const testdataDir = "../testdata/"

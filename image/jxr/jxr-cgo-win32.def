@@ -1,0 +1,5 @@
+LIBRARY jxr-cgo-win32.dll
+
+EXPORTS
+jxr_encode
+jxr_decode

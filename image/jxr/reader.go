@@ -6,9 +6,12 @@ package jxr
 
 import (
 	"errors"
+	"fmt"
+	"image"
 	"io"
+	"io/ioutil"
 
-	"github.com/chai2010/gopkg.image"
+	image_ext "github.com/chai2010/gopkg/image"
 )
 
 const (
@@ -18,19 +21,41 @@ const (
 	ifdLen = 12 // Length of an IFD entry in bytes.
 )
 
-// ErrUnsupported means that the input JPEG/XR image uses a valid but unsupported
-// feature.
-var ErrUnsupported = errors.New("jxr: unsupported JPEG/XR image")
-
 // Decode reads a JPEG/XR image from r and returns it as an image.Image.
 func Decode(r io.Reader) (image.Image, error) {
-	return nil, ErrUnsupported
+	return nil, errors.New("jxr: unsupported JPEG/XR image")
 }
 
 // DecodeConfig returns the color model and dimensions of a JPEG/XR image without
 // decoding the entire image.
 func DecodeConfig(r io.Reader) (config image.Config, err error) {
-	err = ErrUnsupported
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return
+	}
+
+	width, height, channels, depth, data_type, n, err := jxr_decode(data, nil)
+	if err != nil {
+		return
+	}
+
+	if data_type != jxr_unsigned {
+		err = fmt.Errorf("jxr: unsupported data type: %v", data_type)
+		return
+	}
+
+	config.Width = int(width)
+	config.Height = int(height)
+
+	_ = channels
+	_ = depth
+	_ = data_type
+	_ = n
+
+	_ = image_ext.Gray32f{}
+
+	// TODO(chai2010):
+	err = errors.New("jxr: unsupported JPEG/XR image")
 	return
 }
 
