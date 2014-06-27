@@ -52,7 +52,7 @@ func (p *RGBA128f) Set(x, y int, c color.Color) {
 	p.Pix[i] = color_ext.RGBA128fModel.Convert(c).(color_ext.RGBA128f)
 }
 
-func (p *RGBA128f) SetRGB48(x, y int, c color_ext.RGBA128f) {
+func (p *RGBA128f) SetRGBA128f(x, y int, c color_ext.RGBA128f) {
 	if !(image.Point{x, y}.In(p.Rect)) {
 		return
 	}

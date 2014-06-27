@@ -18,13 +18,6 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 	return falseVal
 }
 
-// IterN returns a slice of n 0-sized elements, suitable for ranging over.
-//
-// It does not cause any allocations.
-func IterN(n int) []struct{} {
-	return make([]struct{}, n)
-}
-
 // ByteSlice convert a normal slice to byte slice.
 func ByteSlice(slice interface{}) (data []byte) {
 	sv := reflect.ValueOf(slice)

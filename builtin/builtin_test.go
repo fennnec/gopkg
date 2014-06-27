@@ -18,18 +18,6 @@ func TestIf(t *testing.T) {
 	}
 }
 
-func TestIterN(t *testing.T) {
-	v := make([]int, 10)
-	for i := range IterN(len(v)) {
-		v[i] = i
-	}
-	for i := 0; i < len(v); i++ {
-		if v[i] != i {
-			t.Fatal("%d: expect = %v, got = %v", i, i, v[i])
-		}
-	}
-}
-
 func TestByteSlice(t *testing.T) {
 	type Point struct{ X, Y int }
 

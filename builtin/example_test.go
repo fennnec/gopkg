@@ -22,18 +22,6 @@ func ExampleIf() {
 	// min: 42
 }
 
-func ExampleIterN() {
-	for i := range IterN(5) {
-		fmt.Println(i)
-	}
-	// Output:
-	// 0
-	// 1
-	// 2
-	// 3
-	// 4
-}
-
 func ExampleByteSlice() {
 	src := []color.Gray{color.Gray{0xAA}, color.Gray{0xBB}, color.Gray{0xCC}, color.Gray{0xDD}}
 	dst := make([]byte, len(src))

@@ -53,7 +53,7 @@ func (p *Gray32f) Set(x, y int, c color.Color) {
 	p.Pix[i] = c1
 }
 
-func (p *Gray32f) SetGray16(x, y int, c color_ext.Gray32f) {
+func (p *Gray32f) SetGray32f(x, y int, c color_ext.Gray32f) {
 	if !(image.Point{x, y}.In(p.Rect)) {
 		return
 	}
