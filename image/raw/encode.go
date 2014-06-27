@@ -702,5 +702,4 @@ func (p *Encoder) encodeRGBA128f(m image.Image) (data []byte, err error) {
 	}
 	data = d
 	return
-	return
 }

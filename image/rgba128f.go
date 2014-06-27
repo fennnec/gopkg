@@ -8,14 +8,15 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/chai2010/gopkg/builtin"
 	color_ext "github.com/chai2010/gopkg/image/color"
 )
 
 // RGBA128f is an in-memory image whose At method returns color.RGBA128f values.
 type RGBA128f struct {
 	// Pix holds the image's pixels. The pixel at (x, y) starts at
-	// Pix[(y-Rect.Min.Y)*Stride + (x-Rect.Min.X)].
-	Pix []color_ext.RGBA128f
+	// Pix[(y-Rect.Min.Y)*Stride + (x-Rect.Min.X)*16].
+	Pix []byte
 	// Stride is the Pix stride between vertically adjacent pixels.
 	Stride int
 	// Rect is the image's bounds.
@@ -35,7 +36,12 @@ func (p *RGBA128f) RGBA128fAt(x, y int) color_ext.RGBA128f {
 		return color_ext.RGBA128f{}
 	}
 	i := p.PixOffset(x, y)
-	return p.Pix[i]
+	return color_ext.RGBA128f{
+		R: builtin.Float32(p.Pix[i+0:]),
+		G: builtin.Float32(p.Pix[i+4:]),
+		B: builtin.Float32(p.Pix[i+8:]),
+		A: builtin.Float32(p.Pix[i+16:]),
+	}
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -49,7 +55,11 @@ func (p *RGBA128f) Set(x, y int, c color.Color) {
 		return
 	}
 	i := p.PixOffset(x, y)
-	p.Pix[i] = color_ext.RGBA128fModel.Convert(c).(color_ext.RGBA128f)
+	c1 := color_ext.RGBA128fModel.Convert(c).(color_ext.RGBA128f)
+	builtin.PutFloat32(p.Pix[i+0:], c1.R)
+	builtin.PutFloat32(p.Pix[i+4:], c1.G)
+	builtin.PutFloat32(p.Pix[i+8:], c1.B)
+	builtin.PutFloat32(p.Pix[i+16:], c1.A)
 }
 
 func (p *RGBA128f) SetRGBA128f(x, y int, c color_ext.RGBA128f) {
@@ -57,7 +67,10 @@ func (p *RGBA128f) SetRGBA128f(x, y int, c color_ext.RGBA128f) {
 		return
 	}
 	i := p.PixOffset(x, y)
-	p.Pix[i] = c
+	builtin.PutFloat32(p.Pix[i+0:], c.R)
+	builtin.PutFloat32(p.Pix[i+4:], c.G)
+	builtin.PutFloat32(p.Pix[i+8:], c.B)
+	builtin.PutFloat32(p.Pix[i+16:], c.A)
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -86,6 +99,6 @@ func (p *RGBA128f) Opaque() bool {
 // NewRGBA128f returns a new RGBA128f with the given bounds.
 func NewRGBA128f(r image.Rectangle) *RGBA128f {
 	w, h := r.Dx(), r.Dy()
-	pix := make([]color_ext.RGBA128f, w*h)
-	return &RGBA128f{pix, w, r}
+	pix := make([]byte, w*h*16)
+	return &RGBA128f{pix, w*16, r}
 }

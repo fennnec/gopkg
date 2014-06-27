@@ -118,9 +118,7 @@ func (p *Decoder) decodeGray32f(data []byte) (m image.Image, err error) {
 	gray32f := image_ext.NewGray32f(image.Rect(0, 0, p.Width, p.Height))
 	var off = 0
 	for y := 0; y < p.Height; y++ {
-		// sizeof(gray32f.Pix[0]) == sizeof(color_ext.Gray32f(nil))
-		gray32fPix := builtin.Slice(data[off:], reflect.TypeOf([]color_ext.Gray32f(nil))).([]color_ext.Gray32f)
-		copy(gray32f.Pix[y*gray32f.Stride:][:p.Width], gray32fPix)
+		copy(gray32f.Pix[y*gray32f.Stride:][:p.Width*4], data[off:])
 		off += p.Width * 4
 	}
 	m = gray32f
@@ -178,16 +176,14 @@ func (p *Decoder) decodeRGB96f(data []byte) (m image.Image, err error) {
 	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
 	var off = 0
 	for y := 0; y < p.Height; y++ {
-		// sizeof(gray32f.Pix[0]) == sizeof(color_ext.RGBA128f(nil))
-		f32Pix := builtin.Slice(data[off:], reflect.TypeOf([]float32(nil))).([]float32)
 		for x := 0; x < p.Width; x++ {
 			rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
-				R: f32Pix[x*3+0],
-				G: f32Pix[x*3+1],
-				B: f32Pix[x*3+2],
+				R: builtin.Float32(data[off+0:]),
+				G: builtin.Float32(data[off+4:]),
+				B: builtin.Float32(data[off+8:]),
 			})
+			off += 12
 		}
-		off += p.Width * 12
 	}
 	m = rgba128f
 	return
@@ -239,9 +235,7 @@ func (p *Decoder) decodeRGBA128f(data []byte) (m image.Image, err error) {
 	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
 	var off = 0
 	for y := 0; y < p.Height; y++ {
-		// sizeof(gray32f.Pix[0]) == sizeof(color_ext.RGBA128f(nil))
-		rgba128ffPix := builtin.Slice(data[off:], reflect.TypeOf([]color_ext.RGBA128f(nil))).([]color_ext.RGBA128f)
-		copy(rgba128f.Pix[y*rgba128f.Stride:][:p.Width], rgba128ffPix)
+		copy(rgba128f.Pix[y*rgba128f.Stride:][:p.Width*16], data[off:])
 		off += p.Width * 16
 	}
 	m = rgba128f
