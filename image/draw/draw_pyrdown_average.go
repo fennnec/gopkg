@@ -48,9 +48,9 @@ func drawPyrDownGray_Average_fast(dst *image.Gray, r image.Rectangle, src *image
 
 	if padding := r.Dx() % 4; padding != 0 {
 		for y := r.Min.Y; y < r.Max.Y; y++ {
-			dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
-			srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
-			srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+			dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()*1], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()*2], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()*2], reflect.TypeOf([]uint32(nil))).([]uint32)
 
 			i, j := 0, 0
 			for ; i < len(dstLineX); i++ {
@@ -173,8 +173,8 @@ func drawPyrDownRGBA_Average_fast(dst *image.RGBA, r image.Rectangle, src *image
 
 	for y := r.Min.Y; y < r.Max.Y; y++ {
 		dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()*4], reflect.TypeOf([]uint32(nil))).([]uint32)
-		srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()*4], reflect.TypeOf([]uint32(nil))).([]uint32)
-		srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()*4], reflect.TypeOf([]uint32(nil))).([]uint32)
+		srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()*8], reflect.TypeOf([]uint32(nil))).([]uint32)
+		srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()*8], reflect.TypeOf([]uint32(nil))).([]uint32)
 
 		for i, j := 0, 0; i < len(dstLineX); i, j = i+1, j+2 {
 			dstLineX[i] = mergeRgbaFast(
