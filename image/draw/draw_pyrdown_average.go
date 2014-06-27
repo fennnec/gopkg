@@ -7,7 +7,9 @@ package draw
 import (
 	"image"
 	"image/color"
+	"reflect"
 
+	"github.com/chai2010/gopkg/builtin"
 	image_ext "github.com/chai2010/gopkg/image"
 	color_ext "github.com/chai2010/gopkg/image/color"
 )
@@ -15,6 +17,10 @@ import (
 func drawPyrDownGray_Average(dst *image.Gray, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.Gray:
+		if r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
+			drawPyrDownGray_Average_fast(dst, r, src, sp)
+			return
+		}
 		for y := r.Min.Y; y < r.Max.Y; y++ {
 			for x := r.Min.X; x < r.Max.X; x++ {
 				x0 := (x-r.Min.X)*2 + sp.X
@@ -34,6 +40,56 @@ func drawPyrDownGray_Average(dst *image.Gray, r image.Rectangle, src image.Image
 		drawPyrDown_Average(dst, r, src, sp)
 	}
 }
+
+func drawPyrDownGray_Average_fast(dst *image.Gray, r image.Rectangle, src *image.Gray, sp image.Point) {
+	off0 := dst.PixOffset(r.Min.X, r.Min.Y)
+	off1 := src.PixOffset(sp.X, sp.Y)
+	off2 := off1 + src.Stride
+
+	if padding := r.Dx() % 4; padding != 0 {
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+
+			i, j := 0, 0
+			for ; i < len(dstLineX); i++ {
+				dstLineX[i] = mergeRgbaFast(
+					mergeRgbaFast(srcLine0[j+0], srcLine0[j+1]),
+					mergeRgbaFast(srcLine1[j+0], srcLine1[j+1]),
+				)
+				j += 2
+			}
+			for k := 0; k < padding; k++ {
+				y00 := uint16(src.Pix[off1:][j*4+k*2+0])
+				y01 := uint16(src.Pix[off1:][j*4+k*2+1])
+				y11 := uint16(src.Pix[off2:][j*4+k*2+1])
+				y10 := uint16(src.Pix[off2:][j*4+k*2+0])
+				dst.Pix[off0:][i*4+k] = uint8((y00 + y01 + y11 + y10) / 4)
+			}
+			off0 += dst.Stride
+			off1 += src.Stride
+			off2 += src.Stride
+		}
+	} else {
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+
+			for i, j := 0, 0; i < len(dstLineX); i, j = i+1, j+2 {
+				dstLineX[i] = mergeRgbaFast(
+					mergeRgbaFast(srcLine0[j+0], srcLine0[j+1]),
+					mergeRgbaFast(srcLine1[j+0], srcLine1[j+1]),
+				)
+			}
+			off0 += dst.Stride
+			off1 += src.Stride
+			off2 += src.Stride
+		}
+	}
+}
+
 func drawPyrDownGray16_Average(dst *image.Gray16, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.Gray16:
@@ -56,6 +112,7 @@ func drawPyrDownGray16_Average(dst *image.Gray16, r image.Rectangle, src image.I
 		drawPyrDown_Average(dst, r, src, sp)
 	}
 }
+
 func drawPyrDownGray32f_Average(dst *image_ext.Gray32f, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image_ext.Gray32f:
@@ -82,6 +139,10 @@ func drawPyrDownGray32f_Average(dst *image_ext.Gray32f, r image.Rectangle, src i
 func drawPyrDownRGBA_Average(dst *image.RGBA, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.RGBA:
+		if r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
+			drawPyrDownRGBA_Average_fast(dst, r, src, sp)
+			return
+		}
 		for y := r.Min.Y; y < r.Max.Y; y++ {
 			for x := r.Min.X; x < r.Max.X; x++ {
 				x0 := (x-r.Min.X)*2 + sp.X
@@ -104,6 +165,29 @@ func drawPyrDownRGBA_Average(dst *image.RGBA, r image.Rectangle, src image.Image
 		drawPyrDown_Average(dst, r, src, sp)
 	}
 }
+
+func drawPyrDownRGBA_Average_fast(dst *image.RGBA, r image.Rectangle, src *image.RGBA, sp image.Point) {
+	off0 := dst.PixOffset(r.Min.X, r.Min.Y)
+	off1 := src.PixOffset(sp.X, sp.Y)
+	off2 := off1 + src.Stride
+
+	for y := r.Min.Y; y < r.Max.Y; y++ {
+		dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()*4], reflect.TypeOf([]uint32(nil))).([]uint32)
+		srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()*4], reflect.TypeOf([]uint32(nil))).([]uint32)
+		srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()*4], reflect.TypeOf([]uint32(nil))).([]uint32)
+
+		for i, j := 0, 0; i < len(dstLineX); i, j = i+1, j+2 {
+			dstLineX[i] = mergeRgbaFast(
+				mergeRgbaFast(srcLine0[j+0], srcLine0[j+1]),
+				mergeRgbaFast(srcLine1[j+0], srcLine1[j+1]),
+			)
+		}
+		off0 += dst.Stride
+		off1 += src.Stride
+		off2 += src.Stride
+	}
+}
+
 func drawPyrDownRGBA64_Average(dst *image.RGBA64, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.RGBA64:
