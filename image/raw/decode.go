@@ -57,7 +57,10 @@ func (p *Decoder) Decode(data []byte) (m image.Image, err error) {
 	}
 
 	// Unknown
-	err = fmt.Errorf("image/raw: Decode, unknown image format, channels = %v, dataType = %v", p.Channels, p.DataType)
+	err = fmt.Errorf(
+		"image/raw: Decode, unknown image format, channels = %v, dataType = %v",
+		p.Channels, p.DataType,
+	)
 	return
 }
 

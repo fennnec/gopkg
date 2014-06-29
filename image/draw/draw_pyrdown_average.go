@@ -239,6 +239,10 @@ func drawPyrDownRGBA128f_Average(dst *image_ext.RGBA128f, r image.Rectangle, src
 	}
 }
 
+func drawPyrDownYCbCr_Average(dst *yCbCr, r image.Rectangle, src image.Image, sp image.Point) {
+	drawPyrDown_Average(dst, r, src, sp)
+}
+
 func drawPyrDown_Average(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
 	for y := r.Min.Y; y < r.Max.Y; y++ {
 		for x := r.Min.X; x < r.Max.X; x++ {

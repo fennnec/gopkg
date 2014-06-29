@@ -38,6 +38,8 @@ func DrawPyrDown(
 			drawPyrDownRGBA64_Average(dst, r, src, sp)
 		case *image_ext.RGBA128f:
 			drawPyrDownRGBA128f_Average(dst, r, src, sp)
+		//case *image.YCbCr:
+		//	drawPyrDownYCbCr_Average(&yCbCr{dst}, r, src, sp)
 		default:
 			drawPyrDown_Average(dst, r, src, sp)
 		}
@@ -55,6 +57,8 @@ func DrawPyrDown(
 			drawPyrDownRGBA64_Interlace(dst, r, src, sp)
 		case *image_ext.RGBA128f:
 			drawPyrDownRGBA128f_Interlace(dst, r, src, sp)
+		//case *image.YCbCr:
+		//	drawPyrDownYCbCr_Interlace(&yCbCr{dst}, r, src, sp)
 		default:
 			drawPyrDown_Interlace(dst, r, src, sp)
 		}

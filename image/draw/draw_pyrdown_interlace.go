@@ -106,6 +106,10 @@ func drawPyrDownRGBA128f_Interlace(dst *image_ext.RGBA128f, r image.Rectangle, s
 	}
 }
 
+func drawPyrDownYCbCr_Interlace(dst *yCbCr, r image.Rectangle, src image.Image, sp image.Point) {
+	drawPyrDown_Interlace(dst, r, src, sp)
+}
+
 func drawPyrDown_Interlace(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
 	for y := r.Min.Y; y < r.Max.Y; y++ {
 		for x := r.Min.X; x < r.Max.X; x++ {
