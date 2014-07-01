@@ -108,63 +108,165 @@ func TestEncodeAndDecode(t *testing.T) {
 	}
 }
 
-// YCbCr -> Gray/RGB/RGBA
-func _TestEncodeAndDecode_YCbCr(t *testing.T) {
-	tYCbCrList := []struct {
-		Image    *image.YCbCr
-		Model    color.Model
-		DataType reflect.Kind
-		Channels int
-	}{
-		{
-			Image:    tNewYCbCr(image.Rect(0, 0, 10, 10), image.YCbCrSubsampleRatio420),
-			Model:    color.GrayModel,
-			DataType: reflect.Uint8,
-			Channels: 1,
-		},
-		{
-			Image:    tNewYCbCr(image.Rect(0, 0, 10, 10), image.YCbCrSubsampleRatio420),
-			Model:    color.RGBAModel,
-			DataType: reflect.Uint8,
-			Channels: 3,
-		},
-		{
-			Image:    tNewYCbCr(image.Rect(0, 0, 10, 10), image.YCbCrSubsampleRatio420),
-			Model:    color.RGBAModel,
-			DataType: reflect.Uint8,
-			Channels: 4,
-		},
+func TestEncodeAndDecode_YCbCr2Gray(t *testing.T) {
+	yuv := tNewYCbCr(image.Rect(0, 0, 10, 10), image.YCbCrSubsampleRatio420)
+	tSetYCbCr(yuv, 6, 3, color.Gray{0xAB})
+
+	encoder := Encoder{1, reflect.Uint8}
+	decoder := Decoder{1, reflect.Uint8, yuv.Bounds().Dx(), yuv.Bounds().Dy()}
+
+	data, err := encoder.Encode(yuv)
+	if err != nil {
+		t.Fatalf("%v", err)
 	}
-	for _, v := range tYCbCrList {
-		tSetYCbCr(v.Image, 6, 3, color.RGBA{0xAA, 0xBB, 0xCC, 0xDD})
+	m0, err := decoder.Decode(data)
+	if err != nil {
+		t.Fatalf("%v", err)
 	}
-	for i, v := range tYCbCrList {
-		encoder := Encoder{v.Channels, v.DataType}
-		decoder := Decoder{v.Channels, v.DataType, v.Image.Bounds().Dx(), v.Image.Bounds().Dy()}
 
-		data, err := encoder.Encode(v.Image)
-		if err != nil {
-			t.Fatalf("%d: %v", i, err)
-		}
+	m1, err := decoder.DecodeImage(yuv)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 
-		m, err := decoder.Decode(data)
-		if err != nil {
-			t.Fatalf("%d: %v", i, err)
-		}
+	// check color
+	if m0.ColorModel() != color.GrayModel {
+		t.Fatalf("want %v, got %v", color.GrayModel, m0.ColorModel())
+	}
+	if m1.ColorModel() != color.GrayModel {
+		t.Fatalf("want %v, got %v", color.GrayModel, m1.ColorModel())
+	}
 
-		err = tCompareImage(v.Image, v.Channels, v.Model, m)
-		if err != nil {
-			t.Fatalf("%d: %v", i, err)
-		}
+	// check size
+	if m0.Bounds() != yuv.Bounds() {
+		t.Fatalf("want %v, got %v", yuv.Bounds(), m0.Bounds())
+	}
+	if m1.Bounds() != yuv.Bounds() {
+		t.Fatalf("want %v, got %v", yuv.Bounds(), m1.Bounds())
+	}
 
-		// decoder.DecodeImage
-		m, err = decoder.DecodeImage(v.Image)
-		if err != nil {
-			t.Fatalf("%d: %v", i, err)
+	// check data
+	b := yuv.Bounds()
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			gray := color.GrayModel.Convert(yuv.At(x, y)).(color.Gray)
+			c0 := m0.At(x, y).(color.Gray)
+			c1 := m1.At(x, y).(color.Gray)
+			if c0 != gray {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, gray, c0)
+			}
+			if c1 != gray {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, gray, c1)
+			}
 		}
-		err = tCompareImage(v.Image, v.Channels, v.Model, m)
-		if err != nil {
-			t.Fatalf("%d: %v", i, err)
+	}
+}
+
+func TestEncodeAndDecode_YCbCr2RGB(t *testing.T) {
+	yuv := tNewYCbCr(image.Rect(0, 0, 10, 10), image.YCbCrSubsampleRatio420)
+	tSetYCbCr(yuv, 6, 3, color.RGBA{0xAA, 0xBB, 0xCC, 0xDD})
+
+	encoder := Encoder{3, reflect.Uint8}
+	decoder := Decoder{3, reflect.Uint8, yuv.Bounds().Dx(), yuv.Bounds().Dy()}
+
+	data, err := encoder.Encode(yuv)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	m0, err := decoder.Decode(data)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	m1, err := decoder.DecodeImage(yuv)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// check color
+	if m0.ColorModel() != color.RGBAModel {
+		t.Fatalf("want %v, got %v", color.RGBAModel, m0.ColorModel())
+	}
+	if m1.ColorModel() != color.RGBAModel {
+		t.Fatalf("want %v, got %v", color.RGBAModel, m1.ColorModel())
+	}
+
+	// check size
+	if m0.Bounds() != yuv.Bounds() {
+		t.Fatalf("want %v, got %v", yuv.Bounds(), m0.Bounds())
+	}
+	if m1.Bounds() != yuv.Bounds() {
+		t.Fatalf("want %v, got %v", yuv.Bounds(), m1.Bounds())
+	}
+
+	// check data
+	b := yuv.Bounds()
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			rgba := color.RGBAModel.Convert(yuv.At(x, y)).(color.RGBA)
+			c0 := m0.At(x, y).(color.RGBA)
+			c1 := m1.At(x, y).(color.RGBA)
+			rgba.A, c0.A, c1.A = 0, 0, 0
+			if c0 != rgba {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgba, c0)
+			}
+			if c1 != rgba {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgba, c1)
+			}
+		}
+	}
+}
+
+func TestEncodeAndDecode_YCbCr2RGBA(t *testing.T) {
+	yuv := tNewYCbCr(image.Rect(0, 0, 10, 10), image.YCbCrSubsampleRatio420)
+	tSetYCbCr(yuv, 6, 3, color.RGBA{0xAA, 0xBB, 0xCC, 0xDD})
+
+	encoder := Encoder{4, reflect.Uint8}
+	decoder := Decoder{4, reflect.Uint8, yuv.Bounds().Dx(), yuv.Bounds().Dy()}
+
+	data, err := encoder.Encode(yuv)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	m0, err := decoder.Decode(data)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	m1, err := decoder.DecodeImage(yuv)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	// check color
+	if m0.ColorModel() != color.RGBAModel {
+		t.Fatalf("want %v, got %v", color.RGBAModel, m0.ColorModel())
+	}
+	if m1.ColorModel() != color.RGBAModel {
+		t.Fatalf("want %v, got %v", color.RGBAModel, m1.ColorModel())
+	}
+
+	// check size
+	if m0.Bounds() != yuv.Bounds() {
+		t.Fatalf("want %v, got %v", yuv.Bounds(), m0.Bounds())
+	}
+	if m1.Bounds() != yuv.Bounds() {
+		t.Fatalf("want %v, got %v", yuv.Bounds(), m1.Bounds())
+	}
+
+	// check data
+	b := yuv.Bounds()
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			rgba := color.RGBAModel.Convert(yuv.At(x, y)).(color.RGBA)
+			c0 := m0.At(x, y).(color.RGBA)
+			c1 := m1.At(x, y).(color.RGBA)
+			if c0 != rgba {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgba, c0)
+			}
+			if c1 != rgba {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgba, c1)
+			}
 		}
 	}
 }

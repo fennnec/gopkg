@@ -320,9 +320,9 @@ func (p *Encoder) encodeRGB48(m image.Image) (data []byte, err error) {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.YCbCrAt(x, y)
 				R, G, B := color.YCbCrToRGB(v.Y, v.Cb, v.Cr)
-				builtin.PutUint16(d[off+0:], uint16(R<<8))
-				builtin.PutUint16(d[off+2:], uint16(G<<8))
-				builtin.PutUint16(d[off+4:], uint16(B<<8))
+				builtin.PutUint16(d[off+0:], uint16(R)<<8)
+				builtin.PutUint16(d[off+2:], uint16(G)<<8)
+				builtin.PutUint16(d[off+4:], uint16(B)<<8)
 				off += 6
 			}
 		}
@@ -418,9 +418,9 @@ func (p *Encoder) encodeRGB96f(m image.Image) (data []byte, err error) {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.YCbCrAt(x, y)
 				R, G, B := color.YCbCrToRGB(v.Y, v.Cb, v.Cr)
-				builtin.PutFloat32(d[off+0:], float32(uint16(R<<8)))
-				builtin.PutFloat32(d[off+4:], float32(uint16(G<<8)))
-				builtin.PutFloat32(d[off+8:], float32(uint16(B<<8)))
+				builtin.PutFloat32(d[off+0:], float32(uint16(R)<<8))
+				builtin.PutFloat32(d[off+4:], float32(uint16(G)<<8))
+				builtin.PutFloat32(d[off+8:], float32(uint16(B)<<8))
 				off += 12
 			}
 		}
@@ -492,9 +492,9 @@ func (p *Encoder) encodeRGBA(m image.Image) (data []byte, err error) {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.YCbCrAt(x, y)
 				R, G, B := color.YCbCrToRGB(v.Y, v.Cb, v.Cr)
-				d[off+0] = uint8(R >> 8)
-				d[off+1] = uint8(G >> 8)
-				d[off+2] = uint8(B >> 8)
+				d[off+0] = R
+				d[off+1] = G
+				d[off+2] = B
 				d[off+3] = 0xFF
 				off += 4
 			}
