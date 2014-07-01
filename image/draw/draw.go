@@ -33,6 +33,8 @@ func Draw(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
 		drawRGBA64(dst, r, src, sp)
 	case *image_ext.RGBA128f:
 		drawRGBA128f(dst, r, src, sp)
+	//case *image.YCbCr:
+	//	drawYCbCr(&yCbCr{dst}, r, src, sp)
 	default:
 		drawImage(dst, r, src, sp)
 	}
@@ -114,6 +116,10 @@ func drawRGBA128f(dst *image_ext.RGBA128f, r image.Rectangle, src image.Image, s
 	default:
 		drawImage(dst, r, src, sp)
 	}
+}
+
+func drawYCbCr(dst *yCbCr, r image.Rectangle, src image.Image, sp image.Point) {
+	drawImage(dst, r, src, sp)
 }
 
 func drawImage(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
