@@ -40,14 +40,14 @@ func (p *RGBA128f) RGBA128fAt(x, y int) color_ext.RGBA128f {
 		R: builtin.Float32(p.Pix[i+0:]),
 		G: builtin.Float32(p.Pix[i+4:]),
 		B: builtin.Float32(p.Pix[i+8:]),
-		A: builtin.Float32(p.Pix[i+16:]),
+		A: builtin.Float32(p.Pix[i+12:]),
 	}
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
 func (p *RGBA128f) PixOffset(x, y int) int {
-	return (y-p.Rect.Min.Y)*p.Stride + (x-p.Rect.Min.X)*1
+	return (y-p.Rect.Min.Y)*p.Stride + (x-p.Rect.Min.X)*16
 }
 
 func (p *RGBA128f) Set(x, y int, c color.Color) {
@@ -59,7 +59,7 @@ func (p *RGBA128f) Set(x, y int, c color.Color) {
 	builtin.PutFloat32(p.Pix[i+0:], c1.R)
 	builtin.PutFloat32(p.Pix[i+4:], c1.G)
 	builtin.PutFloat32(p.Pix[i+8:], c1.B)
-	builtin.PutFloat32(p.Pix[i+16:], c1.A)
+	builtin.PutFloat32(p.Pix[i+12:], c1.A)
 }
 
 func (p *RGBA128f) SetRGBA128f(x, y int, c color_ext.RGBA128f) {
@@ -70,7 +70,7 @@ func (p *RGBA128f) SetRGBA128f(x, y int, c color_ext.RGBA128f) {
 	builtin.PutFloat32(p.Pix[i+0:], c.R)
 	builtin.PutFloat32(p.Pix[i+4:], c.G)
 	builtin.PutFloat32(p.Pix[i+8:], c.B)
-	builtin.PutFloat32(p.Pix[i+16:], c.A)
+	builtin.PutFloat32(p.Pix[i+12:], c.A)
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -100,5 +100,5 @@ func (p *RGBA128f) Opaque() bool {
 func NewRGBA128f(r image.Rectangle) *RGBA128f {
 	w, h := r.Dx(), r.Dy()
 	pix := make([]byte, w*h*16)
-	return &RGBA128f{pix, w*16, r}
+	return &RGBA128f{pix, w * 16, r}
 }

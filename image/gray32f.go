@@ -89,5 +89,5 @@ func (p *Gray32f) Opaque() bool {
 func NewGray32f(r image.Rectangle) *Gray32f {
 	w, h := r.Dx(), r.Dy()
 	pix := make([]byte, w*h*4)
-	return &Gray32f{pix, w*4, r}
+	return &Gray32f{pix, w * 4, r}
 }

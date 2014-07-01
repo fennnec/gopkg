@@ -57,7 +57,10 @@ func (p *Decoder) Decode(data []byte) (m image.Image, err error) {
 	}
 
 	// Unknown
-	err = fmt.Errorf("image/raw: Decode, unknown image format, channels = %v, dataType = %v", p.Channels, p.DataType)
+	err = fmt.Errorf(
+		"image/raw: Decode, unknown image format, channels = %v, dataType = %v",
+		p.Channels, p.DataType,
+	)
 	return
 }
 
@@ -70,7 +73,7 @@ func (p *Decoder) getPixelSize() int {
 	case reflect.Float32:
 		return p.Channels * 4
 	}
-	panic("unreachable")
+	panic("image/raw: getPixelSize, unreachable")
 }
 
 func (p *Decoder) getImageDataSize() int {
@@ -79,7 +82,7 @@ func (p *Decoder) getImageDataSize() int {
 
 func (p *Decoder) decodeGray(data []byte) (m image.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+		err = fmt.Errorf("image/raw: decodeGray, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	gray := image.NewGray(image.Rect(0, 0, p.Width, p.Height))
@@ -93,8 +96,8 @@ func (p *Decoder) decodeGray(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeGray16(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeGray16, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	gray16 := image.NewGray16(image.Rect(0, 0, p.Width, p.Height))
@@ -111,8 +114,8 @@ func (p *Decoder) decodeGray16(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeGray32f(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeGray32f, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	gray32f := image_ext.NewGray32f(image.Rect(0, 0, p.Width, p.Height))
@@ -126,8 +129,8 @@ func (p *Decoder) decodeGray32f(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeRGB(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeRGB, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	rgba := image.NewRGBA(image.Rect(0, 0, p.Width, p.Height))
@@ -147,8 +150,8 @@ func (p *Decoder) decodeRGB(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeRGB48(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeRGB48, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	rgba64 := image.NewRGBA64(image.Rect(0, 0, p.Width, p.Height))
@@ -157,9 +160,9 @@ func (p *Decoder) decodeRGB48(data []byte) (m image.Image, err error) {
 		u16Pix := builtin.Slice(data[off:], reflect.TypeOf([]uint16(nil))).([]uint16)
 		for x := 0; x < p.Width; x++ {
 			rgba64.SetRGBA64(x, y, color.RGBA64{
-				R: u16Pix[x+0],
-				G: u16Pix[x+1],
-				B: u16Pix[x+2],
+				R: u16Pix[x*3+0],
+				G: u16Pix[x*3+1],
+				B: u16Pix[x*3+2],
 			})
 		}
 		off += p.Width * 6
@@ -169,8 +172,8 @@ func (p *Decoder) decodeRGB48(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeRGB96f(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeRGB96f, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
@@ -190,8 +193,8 @@ func (p *Decoder) decodeRGB96f(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeRGBA(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeRGBA, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	rgba := image.NewRGBA(image.Rect(0, 0, p.Width, p.Height))
@@ -205,8 +208,8 @@ func (p *Decoder) decodeRGBA(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeRGBA64(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeRGBA64, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	rgba64 := image.NewRGBA64(image.Rect(0, 0, p.Width, p.Height))
@@ -215,10 +218,10 @@ func (p *Decoder) decodeRGBA64(data []byte) (m image.Image, err error) {
 		u16Pix := builtin.Slice(data[off:], reflect.TypeOf([]uint16(nil))).([]uint16)
 		for x := 0; x < p.Width; x++ {
 			rgba64.SetRGBA64(x, y, color.RGBA64{
-				R: u16Pix[x+0],
-				G: u16Pix[x+1],
-				B: u16Pix[x+2],
-				A: u16Pix[x+3],
+				R: u16Pix[x*4+0],
+				G: u16Pix[x*4+1],
+				B: u16Pix[x*4+2],
+				A: u16Pix[x*4+3],
 			})
 		}
 		off += p.Width * 8
@@ -228,8 +231,8 @@ func (p *Decoder) decodeRGBA64(data []byte) (m image.Image, err error) {
 }
 
 func (p *Decoder) decodeRGBA128f(data []byte) (m image.Image, err error) {
-	if size := p.getPixelSize(); len(data) != size {
-		err = fmt.Errorf("image/raw: bad data size: %d", len(data))
+	if size := p.getImageDataSize(); len(data) != size {
+		err = fmt.Errorf("image/raw: decodeRGBA128f, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
 	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
