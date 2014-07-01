@@ -11,6 +11,7 @@ import (
 	"reflect"
 
 	image_ext "github.com/chai2010/gopkg/image"
+	color_ext "github.com/chai2010/gopkg/image/color"
 )
 
 func (p *Decoder) DecodeImage(data image.Image) (m image.Image, err error) {
@@ -189,7 +190,7 @@ func (p *Decoder) decodeImageRGB(data image.Image) (m image.Image, err error) {
 					R: v.Y,
 					G: v.Y,
 					B: v.Y,
-					A: v.Y,
+					A: 0xFF,
 				})
 			}
 		}
@@ -201,7 +202,7 @@ func (p *Decoder) decodeImageRGB(data image.Image) (m image.Image, err error) {
 					R: uint8(v.Y >> 8),
 					G: uint8(v.Y >> 8),
 					B: uint8(v.Y >> 8),
-					A: uint8(v.Y >> 8),
+					A: 0xFF,
 				})
 			}
 		}
@@ -234,7 +235,7 @@ func (p *Decoder) decodeImageRGB48(data image.Image) (m image.Image, err error) 
 					R: uint16(v.Y) >> 8,
 					G: uint16(v.Y) >> 8,
 					B: uint16(v.Y) >> 8,
-					A: uint16(v.Y) >> 8,
+					A: 0xFFFF,
 				})
 			}
 		}
@@ -246,7 +247,7 @@ func (p *Decoder) decodeImageRGB48(data image.Image) (m image.Image, err error) 
 					R: v.Y,
 					G: v.Y,
 					B: v.Y,
-					A: v.Y,
+					A: 0xFFFF,
 				})
 			}
 		}
@@ -270,9 +271,36 @@ func (p *Decoder) decodeImageRGB96f(data image.Image) (m image.Image, err error)
 		return m, nil
 	}
 	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
-	for y := 0; y < p.Height; y++ {
-		for x := 0; x < p.Width; x++ {
-			rgba128f.Set(x, y, data.At(x, y))
+	switch data := data.(type) {
+	case *image.Gray:
+		for y := 0; y < p.Height; y++ {
+			for x := 0; x < p.Width; x++ {
+				v := data.GrayAt(x, y)
+				rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+					R: float32(uint16(v.Y) >> 8),
+					G: float32(uint16(v.Y) >> 8),
+					B: float32(uint16(v.Y) >> 8),
+					A: 0xFFFF,
+				})
+			}
+		}
+	case *image.Gray16:
+		for y := 0; y < p.Height; y++ {
+			for x := 0; x < p.Width; x++ {
+				v := data.Gray16At(x, y)
+				rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+					R: float32(v.Y),
+					G: float32(v.Y),
+					B: float32(v.Y),
+					A: 0xFFFF,
+				})
+			}
+		}
+	default:
+		for y := 0; y < p.Height; y++ {
+			for x := 0; x < p.Width; x++ {
+				rgba128f.Set(x, y, data.At(x, y))
+			}
 		}
 	}
 	m = rgba128f
@@ -297,7 +325,7 @@ func (p *Decoder) decodeImageRGBA(data image.Image) (m image.Image, err error) {
 					R: v.Y,
 					G: v.Y,
 					B: v.Y,
-					A: v.Y,
+					A: 0xFF,
 				})
 			}
 		}
@@ -309,7 +337,7 @@ func (p *Decoder) decodeImageRGBA(data image.Image) (m image.Image, err error) {
 					R: uint8(v.Y >> 8),
 					G: uint8(v.Y >> 8),
 					B: uint8(v.Y >> 8),
-					A: uint8(v.Y >> 8),
+					A: 0xFF,
 				})
 			}
 		}
@@ -342,7 +370,7 @@ func (p *Decoder) decodeImageRGBA64(data image.Image) (m image.Image, err error)
 					R: uint16(v.Y) >> 8,
 					G: uint16(v.Y) >> 8,
 					B: uint16(v.Y) >> 8,
-					A: uint16(v.Y) >> 8,
+					A: 0xFFFF,
 				})
 			}
 		}
@@ -354,7 +382,7 @@ func (p *Decoder) decodeImageRGBA64(data image.Image) (m image.Image, err error)
 					R: v.Y,
 					G: v.Y,
 					B: v.Y,
-					A: v.Y,
+					A: 0xFFFF,
 				})
 			}
 		}
@@ -390,9 +418,48 @@ func (p *Decoder) decodeImageRGBA128f(data image.Image) (m image.Image, err erro
 		return m, nil
 	}
 	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
-	for y := 0; y < p.Height; y++ {
-		for x := 0; x < p.Width; x++ {
-			rgba128f.Set(x, y, data.At(x, y))
+	switch data := data.(type) {
+	case *image.Gray:
+		for y := 0; y < p.Height; y++ {
+			for x := 0; x < p.Width; x++ {
+				v := data.GrayAt(x, y)
+				rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+					R: float32(uint16(v.Y) >> 8),
+					G: float32(uint16(v.Y) >> 8),
+					B: float32(uint16(v.Y) >> 8),
+					A: 0xFFFF,
+				})
+			}
+		}
+	case *image.Gray16:
+		for y := 0; y < p.Height; y++ {
+			for x := 0; x < p.Width; x++ {
+				v := data.Gray16At(x, y)
+				rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+					R: float32(v.Y),
+					G: float32(v.Y),
+					B: float32(v.Y),
+					A: 0xFFFF,
+				})
+			}
+		}
+	case *image.RGBA:
+		for y := 0; y < p.Height; y++ {
+			for x := 0; x < p.Width; x++ {
+				v := data.RGBAAt(x, y)
+				rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+					R: float32(uint16(v.R) >> 8),
+					G: float32(uint16(v.G) >> 8),
+					B: float32(uint16(v.B) >> 8),
+					A: float32(uint16(v.A) >> 8),
+				})
+			}
+		}
+	default:
+		for y := 0; y < p.Height; y++ {
+			for x := 0; x < p.Width; x++ {
+				rgba128f.Set(x, y, data.At(x, y))
+			}
 		}
 	}
 	m = rgba128f
