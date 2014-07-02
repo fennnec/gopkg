@@ -18,27 +18,33 @@ import (
 func drawPyrDownGray_Average(dst *image.Gray, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.Gray:
-		if r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
+		// 64 is a magic, see go test -bench=.
+		if r.Dx() >= 64 && r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
 			drawPyrDownGray_Average_fast(dst, r, src, sp)
 			return
 		}
-		for y := r.Min.Y; y < r.Max.Y; y++ {
-			for x := r.Min.X; x < r.Max.X; x++ {
-				x0 := (x-r.Min.X)*2 + sp.X
-				y0 := (y-r.Min.Y)*2 + sp.Y
-
-				y00 := uint16(src.GrayAt(x0+0, y0+0).Y)
-				y01 := uint16(src.GrayAt(x0+0, y0+1).Y)
-				y11 := uint16(src.GrayAt(x0+1, y0+1).Y)
-				y10 := uint16(src.GrayAt(x0+1, y0+0).Y)
-
-				dst.SetGray(x, y, color.Gray{
-					Y: uint8((y00 + y01 + y11 + y10) / 4),
-				})
-			}
-		}
+		drawPyrDownGray_Average_slow(dst, r, src, sp)
+		return
 	default:
 		drawPyrDown_Average(dst, r, src, sp)
+	}
+}
+
+func drawPyrDownGray_Average_slow(dst *image.Gray, r image.Rectangle, src *image.Gray, sp image.Point) {
+	for y := r.Min.Y; y < r.Max.Y; y++ {
+		for x := r.Min.X; x < r.Max.X; x++ {
+			x0 := (x-r.Min.X)*2 + sp.X
+			y0 := (y-r.Min.Y)*2 + sp.Y
+
+			y00 := uint16(src.GrayAt(x0+0, y0+0).Y)
+			y01 := uint16(src.GrayAt(x0+0, y0+1).Y)
+			y11 := uint16(src.GrayAt(x0+1, y0+1).Y)
+			y10 := uint16(src.GrayAt(x0+1, y0+0).Y)
+
+			dst.SetGray(x, y, color.Gray{
+				Y: uint8((y00 + y01 + y11 + y10) / 4),
+			})
+		}
 	}
 }
 
@@ -74,9 +80,9 @@ func drawPyrDownGray_Average_fast(dst *image.Gray, r image.Rectangle, src *image
 		}
 	} else {
 		for y := r.Min.Y; y < r.Max.Y; y++ {
-			dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
-			srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
-			srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()], reflect.TypeOf([]uint32(nil))).([]uint32)
+			dstLineX := builtin.Slice(dst.Pix[off0:][:r.Dx()*1], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine0 := builtin.Slice(src.Pix[off1:][:r.Dx()*2], reflect.TypeOf([]uint32(nil))).([]uint32)
+			srcLine1 := builtin.Slice(src.Pix[off2:][:r.Dx()*2], reflect.TypeOf([]uint32(nil))).([]uint32)
 
 			for i, j := 0, 0; i < len(dstLineX); i, j = i+1, j+2 {
 				dstLineX[i] = mergeRgbaFast(
@@ -140,30 +146,37 @@ func drawPyrDownGray32f_Average(dst *image_ext.Gray32f, r image.Rectangle, src i
 func drawPyrDownRGBA_Average(dst *image.RGBA, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.RGBA:
-		if r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
+		// 32 is a magic, see go test -bench=.
+		if r.Dx() >= 32 && r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
 			drawPyrDownRGBA_Average_fast(dst, r, src, sp)
 			return
 		}
-		for y := r.Min.Y; y < r.Max.Y; y++ {
-			for x := r.Min.X; x < r.Max.X; x++ {
-				x0 := (x-r.Min.X)*2 + sp.X
-				y0 := (y-r.Min.Y)*2 + sp.Y
-
-				rgba00 := src.RGBAAt(x0+0, y0+0)
-				rgba01 := src.RGBAAt(x0+0, y0+1)
-				rgba11 := src.RGBAAt(x0+1, y0+1)
-				rgba10 := src.RGBAAt(x0+1, y0+0)
-
-				dst.SetRGBA(x, y, color.RGBA{
-					R: uint8((uint16(rgba00.R) + uint16(rgba01.R) + uint16(rgba11.R) + uint16(rgba10.R)) / 4),
-					G: uint8((uint16(rgba00.G) + uint16(rgba01.G) + uint16(rgba11.G) + uint16(rgba10.G)) / 4),
-					B: uint8((uint16(rgba00.B) + uint16(rgba01.B) + uint16(rgba11.B) + uint16(rgba10.B)) / 4),
-					A: uint8((uint16(rgba00.A) + uint16(rgba01.A) + uint16(rgba11.A) + uint16(rgba10.A)) / 4),
-				})
-			}
-		}
+		drawPyrDownRGBA_Average_slow(dst, r, src, sp)
+		return
 	default:
 		drawPyrDown_Average(dst, r, src, sp)
+		return
+	}
+}
+
+func drawPyrDownRGBA_Average_slow(dst *image.RGBA, r image.Rectangle, src *image.RGBA, sp image.Point) {
+	for y := r.Min.Y; y < r.Max.Y; y++ {
+		for x := r.Min.X; x < r.Max.X; x++ {
+			x0 := (x-r.Min.X)*2 + sp.X
+			y0 := (y-r.Min.Y)*2 + sp.Y
+
+			rgba00 := src.RGBAAt(x0+0, y0+0)
+			rgba01 := src.RGBAAt(x0+0, y0+1)
+			rgba11 := src.RGBAAt(x0+1, y0+1)
+			rgba10 := src.RGBAAt(x0+1, y0+0)
+
+			dst.SetRGBA(x, y, color.RGBA{
+				R: uint8((uint16(rgba00.R) + uint16(rgba01.R) + uint16(rgba11.R) + uint16(rgba10.R)) / 4),
+				G: uint8((uint16(rgba00.G) + uint16(rgba01.G) + uint16(rgba11.G) + uint16(rgba10.G)) / 4),
+				B: uint8((uint16(rgba00.B) + uint16(rgba01.B) + uint16(rgba11.B) + uint16(rgba10.B)) / 4),
+				A: uint8((uint16(rgba00.A) + uint16(rgba01.A) + uint16(rgba11.A) + uint16(rgba10.A)) / 4),
+			})
+		}
 	}
 }
 

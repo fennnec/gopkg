@@ -33,40 +33,56 @@ func DrawPyrDown(
 		switch dst := dst.(type) {
 		case *image.Gray:
 			drawPyrDownGray_Average(dst, r, src, sp)
+			return
 		case *image.Gray16:
 			drawPyrDownGray16_Average(dst, r, src, sp)
+			return
 		case *image_ext.Gray32f:
 			drawPyrDownGray32f_Average(dst, r, src, sp)
+			return
 		case *image.RGBA:
 			drawPyrDownRGBA_Average(dst, r, src, sp)
+			return
 		case *image.RGBA64:
 			drawPyrDownRGBA64_Average(dst, r, src, sp)
+			return
 		case *image_ext.RGBA128f:
 			drawPyrDownRGBA128f_Average(dst, r, src, sp)
+			return
 		//case *image.YCbCr:
 		//	drawPyrDownYCbCr_Average(&yCbCr{dst}, r, src, sp)
+		//	return
 		default:
 			drawPyrDown_Average(dst, r, src, sp)
+			return
 		}
 	case Filter_Interlace:
 		switch dst := dst.(type) {
 		case *image.Gray:
 			drawPyrDownGray_Interlace(dst, r, src, sp)
+			return
 		case *image.Gray16:
 			drawPyrDownGray16_Interlace(dst, r, src, sp)
+			return
 		case *image_ext.Gray32f:
 			drawPyrDownGray32f_Interlace(dst, r, src, sp)
+			return
 		case *image.RGBA:
 			drawPyrDownRGBA_Interlace(dst, r, src, sp)
+			return
 		case *image.RGBA64:
 			drawPyrDownRGBA64_Interlace(dst, r, src, sp)
+			return
 		case *image_ext.RGBA128f:
 			drawPyrDownRGBA128f_Interlace(dst, r, src, sp)
+			return
 		//case *image.YCbCr:
 		//	drawPyrDownYCbCr_Interlace(&yCbCr{dst}, r, src, sp)
+		//	return
 		default:
 			drawPyrDown_Interlace(dst, r, src, sp)
+			return
 		}
 	}
-	panic("unreachable")
+	panic("image/draw: DrawPyrDown, unreachable")
 }

@@ -5,5 +5,5 @@
 package draw
 
 func mergeRgbaFast(rgba0, rgba1 uint32) uint32 {
-	return (((rgba0 & 0xFEFEFEFE >> 1) + (rgba1 & 0xFEFEFEFE >> 1)) & 0xFEFEFEFE) >> 1
+	return ((rgba0 & 0xFEFEFEFE >> 1) + (rgba1 & 0xFEFEFEFE >> 1))
 }
