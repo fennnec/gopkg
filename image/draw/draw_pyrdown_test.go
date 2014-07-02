@@ -25,7 +25,7 @@ type tDrawPyrDownTester struct {
 }
 
 func TestDrawPyrDown_Average(t *testing.T) {
-	for i, v := range tDrawPyrDownTesterList_Average {
+	for i, v := range tDrawPyrDownTesterList {
 		tClearImage(v.BgdImage, v.BgdColor)
 		tClearImage(v.FgdImage, v.FgdColor)
 		DrawPyrDown(v.BgdImage, v.DrawRect, v.FgdImage, v.DrawSp, Filter_Average)
@@ -36,7 +36,19 @@ func TestDrawPyrDown_Average(t *testing.T) {
 	}
 }
 
-var tDrawPyrDownTesterList_Average = []tDrawPyrDownTester{
+func TestDrawPyrDown_Interlace(t *testing.T) {
+	for i, v := range tDrawPyrDownTesterList {
+		tClearImage(v.BgdImage, v.BgdColor)
+		tClearImage(v.FgdImage, v.FgdColor)
+		DrawPyrDown(v.BgdImage, v.DrawRect, v.FgdImage, v.DrawSp, Filter_Interlace)
+		err := tCheckImageColor(v.BgdImage, v.FgdRect, v.FgdColor, v.BgdColor)
+		if err != nil {
+			t.Fatalf("%d: %v", i, err)
+		}
+	}
+}
+
+var tDrawPyrDownTesterList = []tDrawPyrDownTester{
 	// Gray
 	tDrawPyrDownTester{
 		BgdImage: image.NewGray(image.Rect(0, 0, 10, 10)),

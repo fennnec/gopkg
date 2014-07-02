@@ -10,7 +10,7 @@ import (
 )
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownGray: 5x5
+// DrawPyrDownGray_Average: 5x5
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_gray_5x5(b *testing.B) {
@@ -53,7 +53,7 @@ func BenchmarkDrawPyrDownGray_Average_fast_5x5(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownGray: 16x16
+// DrawPyrDownGray_Average: 16x16
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_gray_16x16(b *testing.B) {
@@ -96,7 +96,7 @@ func BenchmarkDrawPyrDownGray_Average_fast_16x16(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownGray: 32x32
+// DrawPyrDownGray_Average: 32x32
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_gray_32x32(b *testing.B) {
@@ -139,7 +139,7 @@ func BenchmarkDrawPyrDownGray_Average_fast_32x32(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownGray: 64x64
+// DrawPyrDownGray_Average: 64x64
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_gray_64x64(b *testing.B) {
@@ -182,7 +182,7 @@ func BenchmarkDrawPyrDownGray_Average_fast_64x64(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownGray: 128x128
+// DrawPyrDownGray_Average: 128x128
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_gray_128x128(b *testing.B) {
@@ -225,7 +225,7 @@ func BenchmarkDrawPyrDownGray_Average_fast_128x128(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownRGBA: 5x5
+// DrawPyrDownRGBA_Average: 5x5
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_rgba_5x5(b *testing.B) {
@@ -268,7 +268,7 @@ func BenchmarkDrawPyrDownRGBA_Average_fast_5x5(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownRGBA: 16x16
+// DrawPyrDownRGBA_Average: 16x16
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_rgba_16x16(b *testing.B) {
@@ -311,7 +311,7 @@ func BenchmarkDrawPyrDownRGBA_Average_fast_16x16(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownRGBA: 32x32
+// DrawPyrDownRGBA_Average: 32x32
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_rgba_32x32(b *testing.B) {
@@ -354,7 +354,7 @@ func BenchmarkDrawPyrDownRGBA_Average_fast_32x32(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownRGBA: 64x64
+// DrawPyrDownRGBA_Average: 64x64
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_rgba_64x64(b *testing.B) {
@@ -397,7 +397,7 @@ func BenchmarkDrawPyrDownRGBA_Average_fast_64x64(b *testing.B) {
 }
 
 // ----------------------------------------------------------------------------
-// DrawPyrDownRGBA: 128x128
+// DrawPyrDownRGBA_Average: 128x128
 // ----------------------------------------------------------------------------
 
 func BenchmarkDrawPyrDown_Average_rgba_128x128(b *testing.B) {
@@ -436,6 +436,75 @@ func BenchmarkDrawPyrDownRGBA_Average_fast_128x128(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		drawPyrDownRGBA_Average_fast(dst, r, src, sp)
+	}
+}
+
+// ----------------------------------------------------------------------------
+// DrawPyrDown_Interlace_gray
+// ----------------------------------------------------------------------------
+
+func BenchmarkDrawPyrDown_Interlace_gray_5x5(b *testing.B) {
+	var (
+		dst = image.NewGray(image.Rect(0, 0, 10, 10))
+		src = image.NewGray(image.Rect(0, 0, 10, 10))
+		r   = image.Rect(0, 0, 5, 5)
+		sp  = image.Pt(0, 0)
+	)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		drawPyrDownGray_Interlace(dst, r, src, sp)
+	}
+}
+
+func BenchmarkDrawPyrDown_Interlace_gray_16x16(b *testing.B) {
+	var (
+		dst = image.NewGray(image.Rect(0, 0, 32, 32))
+		src = image.NewGray(image.Rect(0, 0, 32, 32))
+		r   = image.Rect(0, 0, 16, 16)
+		sp  = image.Pt(0, 0)
+	)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		drawPyrDownGray_Interlace(dst, r, src, sp)
+	}
+}
+
+func BenchmarkDrawPyrDown_Interlace_gray_32x32(b *testing.B) {
+	var (
+		dst = image.NewGray(image.Rect(0, 0, 64, 64))
+		src = image.NewGray(image.Rect(0, 0, 64, 64))
+		r   = image.Rect(0, 0, 32, 32)
+		sp  = image.Pt(0, 0)
+	)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		drawPyrDownGray_Interlace(dst, r, src, sp)
+	}
+}
+
+func BenchmarkDrawPyrDown_Interlace_gray_64x64(b *testing.B) {
+	var (
+		dst = image.NewGray(image.Rect(0, 0, 128, 128))
+		src = image.NewGray(image.Rect(0, 0, 128, 128))
+		r   = image.Rect(0, 0, 64, 64)
+		sp  = image.Pt(0, 0)
+	)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		drawPyrDownGray_Interlace(dst, r, src, sp)
+	}
+}
+
+func BenchmarkDrawPyrDown_Interlace_gray_128x128(b *testing.B) {
+	var (
+		dst = image.NewGray(image.Rect(0, 0, 256, 256))
+		src = image.NewGray(image.Rect(0, 0, 256, 256))
+		r   = image.Rect(0, 0, 128, 128)
+		sp  = image.Pt(0, 0)
+	)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		drawPyrDownGray_Interlace(dst, r, src, sp)
 	}
 }
 
