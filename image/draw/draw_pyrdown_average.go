@@ -7,6 +7,7 @@ package draw
 import (
 	"image"
 	"image/color"
+	"image/draw"
 	"reflect"
 
 	"github.com/chai2010/gopkg/builtin"
@@ -243,7 +244,7 @@ func drawPyrDownYCbCr_Average(dst *yCbCr, r image.Rectangle, src image.Image, sp
 	drawPyrDown_Average(dst, r, src, sp)
 }
 
-func drawPyrDown_Average(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
+func drawPyrDown_Average(dst draw.Image, r image.Rectangle, src image.Image, sp image.Point) {
 	for y := r.Min.Y; y < r.Max.Y; y++ {
 		for x := r.Min.X; x < r.Max.X; x++ {
 			x0 := (x-r.Min.X)*2 + sp.X

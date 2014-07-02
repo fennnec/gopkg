@@ -6,6 +6,7 @@ package draw
 
 import (
 	"image"
+	"image/draw"
 
 	image_ext "github.com/chai2010/gopkg/image"
 )
@@ -20,9 +21,13 @@ const (
 // DrawPyrDown aligns r.Min in dst with sp in src and then replaces
 // the rectangle r in dst with downsamples src.
 func DrawPyrDown(
-	dst Image, r image.Rectangle, src image.Image, sp image.Point,
+	dst draw.Image, r image.Rectangle, src image.Image, sp image.Point,
 	filter Filter,
 ) {
+	r0 := r.Intersect(dst.Bounds()).Sub(r.Min)
+	r1 := image.Rect(sp.X, sp.Y, r.Dx()*2, r.Dy()*2).Intersect(src.Bounds()).Sub(sp)
+	r = r0.Intersect(image.Rect(0, 0, (r1.Max.X+1)/2, (r1.Max.Y+1)/2)).Add(r.Min)
+
 	switch filter {
 	case Filter_Average:
 		switch dst := dst.(type) {

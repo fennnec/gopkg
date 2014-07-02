@@ -7,19 +7,17 @@ package draw
 
 import (
 	"image"
-	"image/color"
+	"image/draw"
 
 	image_ext "github.com/chai2010/gopkg/image"
 )
 
-// Image is an image.Image with a Set method to change a single pixel.
-type Image interface {
-	image.Image
-	Set(x, y int, c color.Color)
-}
-
 // Draw aligns r.Min in dst with sp in src and then replaces the rectangle r in dst with src.
-func Draw(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
+func Draw(dst draw.Image, r image.Rectangle, src image.Image, sp image.Point) {
+	r0 := r.Intersect(dst.Bounds()).Sub(r.Min)
+	r1 := image.Rect(sp.X, sp.Y, r.Dx(), r.Dy()).Intersect(src.Bounds()).Sub(sp)
+	r = r0.Intersect(r1).Add(r.Min)
+
 	switch dst := dst.(type) {
 	case *image.Gray:
 		drawGray(dst, r, src, sp)
@@ -122,7 +120,7 @@ func drawYCbCr(dst *yCbCr, r image.Rectangle, src image.Image, sp image.Point) {
 	drawImage(dst, r, src, sp)
 }
 
-func drawImage(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
+func drawImage(dst draw.Image, r image.Rectangle, src image.Image, sp image.Point) {
 	for y := r.Min.Y; y < r.Max.Y; y++ {
 		for x := r.Min.X; x < r.Max.X; x++ {
 			dst.Set(x, y, src.At(x-r.Min.X+sp.X, y-r.Min.Y+sp.Y))

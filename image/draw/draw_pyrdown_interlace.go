@@ -6,6 +6,7 @@ package draw
 
 import (
 	"image"
+	"image/draw"
 
 	image_ext "github.com/chai2010/gopkg/image"
 )
@@ -110,7 +111,7 @@ func drawPyrDownYCbCr_Interlace(dst *yCbCr, r image.Rectangle, src image.Image, 
 	drawPyrDown_Interlace(dst, r, src, sp)
 }
 
-func drawPyrDown_Interlace(dst Image, r image.Rectangle, src image.Image, sp image.Point) {
+func drawPyrDown_Interlace(dst draw.Image, r image.Rectangle, src image.Image, sp image.Point) {
 	for y := r.Min.Y; y < r.Max.Y; y++ {
 		for x := r.Min.X; x < r.Max.X; x++ {
 			x0 := (x-r.Min.X)*2 + sp.X
