@@ -37,11 +37,23 @@ func (p *Image) ColorModel() color.Model { return p.Model }
 func (p *Image) Bounds() image.Rectangle { return p.Rect }
 
 func (p *Image) At(x, y int) color.Color {
-	level, col, row := len(p.TileMap)-1, x/p.TileSize.X, y/p.TileSize.Y
+	level, col, row := p.Levels()-1, x/p.TileSize.X, y/p.TileSize.Y
 	if m := p.TileMap[level][col][row]; m != nil {
 		return m.At(x%p.TileSize.X, y%p.TileSize.Y)
 	}
 	return color.Gray{}
+}
+
+func (p *Image) Levels() int {
+	return len(p.TileMap)
+}
+
+func (p *Image) TilesAcross(level int) int {
+	return len(p.TileMap[level])
+}
+
+func (p *Image) TilesDown(level int) int {
+	return len(p.TileMap[level][0])
 }
 
 func (p *Image) GetTile(level, col, row int) (m image.Image, err error) {
@@ -66,7 +78,7 @@ func (p *Image) SetTile(level, col, row int, m image.Image) (err error) {
 }
 
 func (p *Image) ReadRect(level, x, y, dx, dy int) (m image.Image, err error) {
-	if level < 0 || level >= len(p.TileMap) {
+	if level < 0 || level >= p.Levels() {
 		err = fmt.Errorf(
 			"image/big: Image.ReadRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
 			level, x, y, dx, dy,
@@ -86,10 +98,10 @@ func (p *Image) ReadRect(level, x, y, dx, dy int) (m image.Image, err error) {
 	tMaxX := (x + dx + p.TileSize.X - 1) / p.TileSize.X
 	tMaxY := (y + dy + p.TileSize.Y - 1) / p.TileSize.Y
 
-	if max := len(p.TileMap[level]); tMaxX > max {
+	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
 	}
-	if max := len(p.TileMap[level][0]); tMaxY > max {
+	if max := p.TilesDown(level); tMaxY > max {
 		tMaxY = max
 	}
 
@@ -142,7 +154,7 @@ func (p *Image) readRectFromTile(dst, tile image.Image, x, y, dx, dy, col, row i
 }
 
 func (p *Image) WriteRect(level, x, y, dx, dy int, m image.Image) (err error) {
-	if level < 0 || level >= len(p.TileMap) {
+	if level < 0 || level >= p.Levels() {
 		err = fmt.Errorf(
 			"image/big: Image.WriteRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
 			level, x, y, dx, dy,
@@ -166,10 +178,10 @@ func (p *Image) WriteRect(level, x, y, dx, dy int, m image.Image) (err error) {
 	tMaxX := (x + dx + p.TileSize.X - 1) / p.TileSize.X
 	tMaxY := (y + dy + p.TileSize.Y - 1) / p.TileSize.Y
 
-	if max := len(p.TileMap[level]); tMaxX > max {
+	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
 	}
-	if max := len(p.TileMap[level][0]); tMaxY > max {
+	if max := p.TilesDown(level); tMaxY > max {
 		tMaxY = max
 	}
 
@@ -233,11 +245,11 @@ func (p *Image) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 		tMaxRow := maxY / p.TileSize.Y
 
 		for row := tMinRow; row <= tMaxRow; row++ {
-			if row >= len(p.TileMap[level][0]) {
+			if row >= p.TilesDown(level) {
 				continue
 			}
 			for col := tMinCol; col <= tMaxCol; col++ {
-				if col >= len(p.TileMap[level]) {
+				if col >= p.TilesAcross(level) {
 					continue
 				}
 				if err = p.updateTileAndParent(level, col, row); err != nil {

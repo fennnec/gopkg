@@ -42,11 +42,23 @@ func (p *Dem) At(x, y int) color.Color {
 }
 
 func (p *Dem) Gray32fAt(x, y int) color_ext.Gray32f {
-	level, col, row := len(p.TileMap)-1, x/p.TileSize.X, y/p.TileSize.Y
+	level, col, row := p.Levels()-1, x/p.TileSize.X, y/p.TileSize.Y
 	if m := p.TileMap[level][col][row]; m != nil {
 		return m.At(x%p.TileSize.X, y%p.TileSize.Y).(color_ext.Gray32f)
 	}
 	return color_ext.Gray32f{}
+}
+
+func (p *Dem) Levels() int {
+	return len(p.TileMap)
+}
+
+func (p *Dem) TilesAcross(level int) int {
+	return len(p.TileMap[level])
+}
+
+func (p *Dem) TilesDown(level int) int {
+	return len(p.TileMap[level][0])
 }
 
 func (p *Dem) GetTile(level, col, row int) (m *image_ext.Gray32f, err error) {
@@ -67,7 +79,7 @@ func (p *Dem) SetTile(level, col, row int, m *image_ext.Gray32f) (err error) {
 }
 
 func (p *Dem) ReadRect(level, x, y, dx, dy int) (m *image_ext.Gray32f, err error) {
-	if level < 0 || level >= len(p.TileMap) {
+	if level < 0 || level >= p.Levels() {
 		err = fmt.Errorf(
 			"image/big: Dem.ReadRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
 			level, x, y, dx, dy,
@@ -87,10 +99,10 @@ func (p *Dem) ReadRect(level, x, y, dx, dy int) (m *image_ext.Gray32f, err error
 	tMaxX := (x + dx + p.TileSize.X - 1) / p.TileSize.X
 	tMaxY := (y + dy + p.TileSize.Y - 1) / p.TileSize.Y
 
-	if max := len(p.TileMap[level]); tMaxX > max {
+	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
 	}
-	if max := len(p.TileMap[level][0]); tMaxY > max {
+	if max := p.TilesDown(level); tMaxY > max {
 		tMaxY = max
 	}
 
@@ -143,7 +155,7 @@ func (p *Dem) readRectFromTile(dst, tile *image_ext.Gray32f, x, y, dx, dy, col, 
 }
 
 func (p *Dem) WriteRect(level, x, y, dx, dy int, m *image_ext.Gray32f) (err error) {
-	if level < 0 || level >= len(p.TileMap) {
+	if level < 0 || level >= p.Levels() {
 		err = fmt.Errorf(
 			"image/big: Dem.WriteRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
 			level, x, y, dx, dy,
@@ -163,10 +175,10 @@ func (p *Dem) WriteRect(level, x, y, dx, dy int, m *image_ext.Gray32f) (err erro
 	tMaxX := (x + dx + p.TileSize.X - 1) / p.TileSize.X
 	tMaxY := (y + dy + p.TileSize.Y - 1) / p.TileSize.Y
 
-	if max := len(p.TileMap[level]); tMaxX > max {
+	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
 	}
-	if max := len(p.TileMap[level][0]); tMaxY > max {
+	if max := p.TilesDown(level); tMaxY > max {
 		tMaxY = max
 	}
 
@@ -230,11 +242,11 @@ func (p *Dem) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 		tMaxRow := maxY / p.TileSize.Y
 
 		for row := tMinRow; row <= tMaxRow; row++ {
-			if row >= len(p.TileMap[level][0]) {
+			if row >= p.TilesDown(level) {
 				continue
 			}
 			for col := tMinCol; col <= tMaxCol; col++ {
-				if col >= len(p.TileMap[level]) {
+				if col >= p.TilesAcross(level) {
 					continue
 				}
 				if err = p.updateTileAndParent(level, col, row); err != nil {
