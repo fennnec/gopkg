@@ -93,3 +93,8 @@ func TestSlice_notAlign(t *testing.T) {
 		}
 	}
 }
+
+// BUG(chai2010): check gc moving/compacting
+func TestSlice_gc_moving_compacting(t *testing.T) {
+	// how to check ?
+}
