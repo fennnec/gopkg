@@ -8,13 +8,14 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"reflect"
 
 	image_ext "github.com/chai2010/gopkg/image"
 	color_ext "github.com/chai2010/gopkg/image/color"
 )
 
-func (p *Decoder) DecodeImage(data image.Image) (m image.Image, err error) {
+func (p *Decoder) DecodeImage(data image.Image) (m draw.Image, err error) {
 	// Gray/Gray16/Gray32f
 	if p.Channels == 1 && p.DataType == reflect.Uint8 {
 		return p.decodeImageGray(data)
@@ -56,7 +57,7 @@ func (p *Decoder) DecodeImage(data image.Image) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageGray(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageGray(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -103,7 +104,7 @@ func (p *Decoder) decodeImageGray(data image.Image) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageGray16(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageGray16(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -154,7 +155,7 @@ func (p *Decoder) decodeImageGray16(data image.Image) (m image.Image, err error)
 	return
 }
 
-func (p *Decoder) decodeImageGray32f(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageGray32f(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -172,7 +173,7 @@ func (p *Decoder) decodeImageGray32f(data image.Image) (m image.Image, err error
 	return
 }
 
-func (p *Decoder) decodeImageRGB(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageRGB(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -217,7 +218,7 @@ func (p *Decoder) decodeImageRGB(data image.Image) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageRGB48(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageRGB48(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -262,7 +263,7 @@ func (p *Decoder) decodeImageRGB48(data image.Image) (m image.Image, err error) 
 	return
 }
 
-func (p *Decoder) decodeImageRGB96f(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageRGB96f(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -307,7 +308,7 @@ func (p *Decoder) decodeImageRGB96f(data image.Image) (m image.Image, err error)
 	return
 }
 
-func (p *Decoder) decodeImageRGBA(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageRGBA(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -352,7 +353,7 @@ func (p *Decoder) decodeImageRGBA(data image.Image) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageRGBA64(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageRGBA64(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -409,7 +410,7 @@ func (p *Decoder) decodeImageRGBA64(data image.Image) (m image.Image, err error)
 	return
 }
 
-func (p *Decoder) decodeImageRGBA128f(data image.Image) (m image.Image, err error) {
+func (p *Decoder) decodeImageRGBA128f(data image.Image) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return

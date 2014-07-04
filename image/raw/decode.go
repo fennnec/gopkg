@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"reflect"
 
 	"github.com/chai2010/gopkg/builtin"
@@ -22,7 +23,7 @@ type Decoder struct {
 	Height   int          // need for Decode
 }
 
-func (p *Decoder) Decode(data []byte) (m image.Image, err error) {
+func (p *Decoder) Decode(data []byte) (m draw.Image, err error) {
 	// Gray/Gray16/Gray32f
 	if p.Channels == 1 && p.DataType == reflect.Uint8 {
 		return p.decodeGray(data)
@@ -80,7 +81,7 @@ func (p *Decoder) getImageDataSize() int {
 	return p.getPixelSize() * p.Width * p.Height
 }
 
-func (p *Decoder) decodeGray(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeGray(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeGray, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -95,7 +96,7 @@ func (p *Decoder) decodeGray(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeGray16(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeGray16(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeGray16, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -113,7 +114,7 @@ func (p *Decoder) decodeGray16(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeGray32f(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeGray32f(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeGray32f, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -128,7 +129,7 @@ func (p *Decoder) decodeGray32f(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeRGB(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeRGB(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeRGB, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -149,7 +150,7 @@ func (p *Decoder) decodeRGB(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeRGB48(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeRGB48(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeRGB48, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -171,7 +172,7 @@ func (p *Decoder) decodeRGB48(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeRGB96f(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeRGB96f(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeRGB96f, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -192,7 +193,7 @@ func (p *Decoder) decodeRGB96f(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeRGBA(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeRGBA(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeRGBA, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -207,7 +208,7 @@ func (p *Decoder) decodeRGBA(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeRGBA64(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeRGBA64(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeRGBA64, bad data size, expect = %d, got = %d", size, len(data))
 		return
@@ -230,7 +231,7 @@ func (p *Decoder) decodeRGBA64(data []byte) (m image.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeRGBA128f(data []byte) (m image.Image, err error) {
+func (p *Decoder) decodeRGBA128f(data []byte) (m draw.Image, err error) {
 	if size := p.getImageDataSize(); len(data) != size {
 		err = fmt.Errorf("image/raw: decodeRGBA128f, bad data size, expect = %d, got = %d", size, len(data))
 		return
