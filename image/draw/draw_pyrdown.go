@@ -25,7 +25,7 @@ func DrawPyrDown(
 	filter Filter,
 ) {
 	r0 := r.Intersect(dst.Bounds()).Sub(r.Min)
-	r1 := image.Rect(sp.X, sp.Y, r.Dx()*2, r.Dy()*2).Intersect(src.Bounds()).Sub(sp)
+	r1 := image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).Intersect(src.Bounds()).Sub(sp)
 	r = r0.Intersect(image.Rect(0, 0, (r1.Max.X+1)/2, (r1.Max.Y+1)/2)).Add(r.Min)
 
 	switch filter {
