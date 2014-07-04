@@ -15,7 +15,7 @@ import (
 // Draw aligns r.Min in dst with sp in src and then replaces the rectangle r in dst with src.
 func Draw(dst draw.Image, r image.Rectangle, src image.Image, sp image.Point) {
 	r0 := r.Intersect(dst.Bounds()).Sub(r.Min)
-	r1 := image.Rect(sp.X, sp.Y, r.Dx(), r.Dy()).Intersect(src.Bounds()).Sub(sp)
+	r1 := image.Rect(sp.X, sp.Y, sp.X+r.Dx(), sp.Y+r.Dy()).Intersect(src.Bounds()).Sub(sp)
 	r = r0.Intersect(r1).Add(r.Min)
 
 	switch dst := dst.(type) {

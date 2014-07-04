@@ -23,13 +23,29 @@ type Dem struct {
 
 func NewDem(r image.Rectangle, tileSize image.Point, zeroValue color_ext.Gray32f) *Dem {
 	if r.Empty() || tileSize.X <= 0 || tileSize.Y <= 0 {
-		panic(fmt.Sprintf("image/big: NewDem, bad arguments: %v, %v", r, tileSize))
+		panic(fmt.Sprintf("image/big: NewDem, bad arguments: r = %v, tileSize = %v", r, tileSize))
 	}
 	return &Dem{
 		TileMap:   makeDemTileMap(r, tileSize),
 		TileSize:  tileSize,
 		Rect:      r,
 		ZeroValue: zeroValue,
+	}
+}
+
+func (p *Dem) SubLevels(levels int) *Dem {
+	r := p.Rect
+	for i := levels; i < p.Levels(); i++ {
+		r.Min.X /= 2
+		r.Min.Y /= 2
+		r.Max.X /= 2
+		r.Max.Y /= 2
+	}
+	return &Dem{
+		TileMap:   p.TileMap[:levels],
+		TileSize:  p.TileSize,
+		Rect:      r,
+		ZeroValue: p.ZeroValue,
 	}
 }
 
@@ -49,27 +65,59 @@ func (p *Dem) Gray32fAt(x, y int) color_ext.Gray32f {
 	return color_ext.Gray32f{}
 }
 
+func (p *Dem) Set(x, y int, c color.Color) {
+	if !(image.Point{x, y}.In(p.Rect)) {
+		return
+	}
+	m := p.GetTile(p.Levels()-1, x/p.TileSize.X, y/p.TileSize.Y)
+	m.Set(x%p.TileSize.X, y%p.TileSize.Y, c)
+	return
+}
+
+func (p *Dem) SetGray32f(x, y int, c color_ext.Gray32f) {
+	if !(image.Point{x, y}.In(p.Rect)) {
+		return
+	}
+	m := p.GetTile(p.Levels()-1, x/p.TileSize.X, y/p.TileSize.Y)
+	m.SetGray32f(x%p.TileSize.X, y%p.TileSize.Y, c)
+	return
+}
+
 func (p *Dem) Levels() int {
 	return len(p.TileMap)
 }
 
+func (p *Dem) adjustLevel(level int) int {
+	if level < 0 {
+		return p.Levels() + level
+	}
+	return level
+}
+
 func (p *Dem) TilesAcross(level int) int {
-	return len(p.TileMap[level])
+	level = p.adjustLevel(level)
+	v := len(p.TileMap[level])
+	return v
 }
 
 func (p *Dem) TilesDown(level int) int {
-	return len(p.TileMap[level][0])
+	level = p.adjustLevel(level)
+	v := len(p.TileMap[level][0])
+	return v
 }
 
-func (p *Dem) GetTile(level, col, row int) (m *image_ext.Gray32f, err error) {
+func (p *Dem) GetTile(level, col, row int) (m *image_ext.Gray32f) {
+	level = p.adjustLevel(level)
 	if m = p.TileMap[level][col][row]; m != nil {
 		return
 	}
-	err = fmt.Errorf("image/big: Dem.GetTile, not found tile")
+	m = newDemTile(p.TileSize, p.ZeroValue)
+	p.TileMap[level][col][row] = m
 	return
 }
 
 func (p *Dem) SetTile(level, col, row int, m *image_ext.Gray32f) (err error) {
+	level = p.adjustLevel(level)
 	if m.Bounds() != image.Rect(0, 0, p.TileSize.X, p.TileSize.Y) {
 		err = fmt.Errorf("image/big: Dem.SetTile, bad bound size: %v", m.Bounds())
 		return
@@ -78,26 +126,21 @@ func (p *Dem) SetTile(level, col, row int, m *image_ext.Gray32f) (err error) {
 	return
 }
 
-func (p *Dem) ReadRect(level, x, y, dx, dy int) (m *image_ext.Gray32f, err error) {
-	if level < 0 || level >= p.Levels() {
-		err = fmt.Errorf(
-			"image/big: Dem.ReadRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
-			level, x, y, dx, dy,
-		)
+func (p *Dem) ReadRect(r image.Rectangle, level int) (m *image_ext.Gray32f, err error) {
+	level = p.adjustLevel(level)
+	if !r.In(p.Bounds()) {
+		err = fmt.Errorf("image/big: Dem.ReadRect, r = %v, level = %v", r, level)
 		return
 	}
-	if !image.Rect(x, y, x+dx, y+dy).In(p.Bounds()) {
-		err = fmt.Errorf(
-			"image/big: Dem.ReadRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
-			level, x, y, dx, dy,
-		)
+	if level < 0 || level >= p.Levels() {
+		err = fmt.Errorf("image/big: Dem.ReadRect, r = %v, level = %v", r, level)
 		return
 	}
 
-	tMinX := x / p.TileSize.X
-	tMinY := y / p.TileSize.Y
-	tMaxX := (x + dx + p.TileSize.X - 1) / p.TileSize.X
-	tMaxY := (y + dy + p.TileSize.Y - 1) / p.TileSize.Y
+	tMinX := r.Min.X / p.TileSize.X
+	tMinY := r.Min.Y / p.TileSize.Y
+	tMaxX := (r.Min.X + r.Dx() + p.TileSize.X - 1) / p.TileSize.X
+	tMaxY := (r.Min.Y + r.Dy() + p.TileSize.Y - 1) / p.TileSize.Y
 
 	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
@@ -109,11 +152,7 @@ func (p *Dem) ReadRect(level, x, y, dx, dy int) (m *image_ext.Gray32f, err error
 	m = newDemTile(p.TileSize, p.ZeroValue)
 	for col := tMinX; col < tMaxX; col++ {
 		for row := tMinY; row < tMaxY; row++ {
-			var tile *image_ext.Gray32f
-			if tile, err = p.GetTile(level, col, row); err != nil {
-				return
-			}
-			p.readRectFromTile(m, tile, x, y, dx, dy, col, row)
+			p.readRectFromTile(m, p.GetTile(level, col, row), r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
 		}
 	}
 	return
@@ -154,26 +193,17 @@ func (p *Dem) readRectFromTile(dst, tile *image_ext.Gray32f, x, y, dx, dy, col, 
 	return
 }
 
-func (p *Dem) WriteRect(level, x, y, dx, dy int, m *image_ext.Gray32f) (err error) {
-	if level < 0 || level >= p.Levels() {
-		err = fmt.Errorf(
-			"image/big: Dem.WriteRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
-			level, x, y, dx, dy,
-		)
-		return
-	}
-	if !image.Rect(x, y, x+dx, y+dy).In(p.Bounds()) {
-		err = fmt.Errorf(
-			"image/big: Dem.WriteRect, level = %d, x = %d, y = %d, dx = %d, dy = %d",
-			level, x, y, dx, dy,
-		)
+func (p *Dem) WriteRect(r image.Rectangle, m *image_ext.Gray32f, level int) (err error) {
+	level = p.adjustLevel(level)
+	if !r.In(p.Bounds()) || level < 0 || level >= p.Levels() {
+		err = fmt.Errorf("image/big: Dem.WriteRect, r = %v, level = %v", r, level)
 		return
 	}
 
-	tMinX := x / p.TileSize.X
-	tMinY := y / p.TileSize.Y
-	tMaxX := (x + dx + p.TileSize.X - 1) / p.TileSize.X
-	tMaxY := (y + dy + p.TileSize.Y - 1) / p.TileSize.Y
+	tMinX := r.Min.X / p.TileSize.X
+	tMinY := r.Min.Y / p.TileSize.Y
+	tMaxX := (r.Min.X + r.Dx() + p.TileSize.X - 1) / p.TileSize.X
+	tMaxY := (r.Min.Y + r.Dy() + p.TileSize.Y - 1) / p.TileSize.Y
 
 	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
@@ -184,15 +214,11 @@ func (p *Dem) WriteRect(level, x, y, dx, dy int, m *image_ext.Gray32f) (err erro
 
 	for col := tMinX; col < tMaxX; col++ {
 		for row := tMinY; row < tMaxY; row++ {
-			var tile *image_ext.Gray32f
-			if tile, err = p.GetTile(level, col, row); err != nil {
-				return
-			}
-			p.writeRectToTile(m, tile, x, y, dx, dy, col, row)
+			p.writeRectToTile(m, p.GetTile(level, col, row), r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
 		}
 	}
 
-	err = p.updateRectPyramid(level, x, y, dx, dy)
+	err = p.updateRectPyramid(level, r.Min.X, r.Min.Y, r.Dx(), r.Dy())
 	return
 }
 
@@ -218,7 +244,7 @@ func (p *Dem) writeRectToTile(src, tile *image_ext.Gray32f, x, y, dx, dy, col, r
 
 	draw_ext.Draw(
 		tile, image.Rect(
-			zMinX-tMinY,
+			zMinX-tMinX,
 			zMinY-tMinY,
 			zMaxX-tMinX,
 			zMaxY-tMinY,
@@ -249,7 +275,7 @@ func (p *Dem) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 				if col >= p.TilesAcross(level) {
 					continue
 				}
-				if err = p.updateTileAndParent(level, col, row); err != nil {
+				if err = p.updateParentTile(level, col, row); err != nil {
 					return
 				}
 			}
@@ -262,15 +288,8 @@ func (p *Dem) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 	return
 }
 
-func (p *Dem) updateTileAndParent(level, col, row int) (err error) {
-	child, err := p.GetTile(level, col, row)
-	if err != nil {
-		return
-	}
-	parent, err := p.GetTile(level-1, col/2, row/2)
-	if err != nil {
-		return
-	}
+func (p *Dem) updateParentTile(level, col, row int) (err error) {
+	parent, child := p.GetTile(level-1, col/2, row/2), p.GetTile(level, col, row)
 	switch {
 	case col%2 == 0 && row%2 == 0:
 		draw_ext.DrawPyrDown(
