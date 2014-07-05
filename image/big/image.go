@@ -129,8 +129,8 @@ func (p *Image) ReadRect(r image.Rectangle, level int) (m image.Image, err error
 
 	tMinX := r.Min.X / p.TileSize.X
 	tMinY := r.Min.Y / p.TileSize.Y
-	tMaxX := (r.Min.X + r.Dx() + p.TileSize.X - 1) / p.TileSize.X
-	tMaxY := (r.Min.Y + r.Dy() + p.TileSize.Y - 1) / p.TileSize.Y
+	tMaxX := (r.Max.X + p.TileSize.X - 1) / p.TileSize.X
+	tMaxY := (r.Max.Y + p.TileSize.Y - 1) / p.TileSize.Y
 
 	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
@@ -139,7 +139,7 @@ func (p *Image) ReadRect(r image.Rectangle, level int) (m image.Image, err error
 		tMaxY = max
 	}
 
-	dst := newImageTile(p.TileSize, p.Model)
+	dst := newImageTile(r.Size(), p.Model)
 	for col := tMinX; col < tMaxX; col++ {
 		for row := tMinY; row < tMaxY; row++ {
 			p.readRectFromTile(dst, p.GetTile(level, col, row), r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
@@ -172,9 +172,9 @@ func (p *Image) readRectFromTile(dst, tile draw.Image, x, y, dx, dy, col, row in
 	draw_ext.Draw(
 		dst.(draw.Image), image.Rect(
 			zMinX-bMinX,
-			zMinX-tMinX,
-			zMaxX-zMinX,
-			zMaxY-zMinY,
+			zMinY-bMinY,
+			zMaxX-bMinX,
+			zMaxY-bMinY,
 		),
 		tile, image.Pt(
 			zMinX-tMinX,
@@ -190,15 +190,11 @@ func (p *Image) WriteRect(r image.Rectangle, m image.Image, level int) (err erro
 		err = fmt.Errorf("image/big: Image.WriteRect, rect = %v, level = %v", r, level)
 		return
 	}
-	if m.ColorModel() != p.Model {
-		err = fmt.Errorf("image/big: Image.WriteRect, bad color model: %T", m.ColorModel())
-		return
-	}
 
 	tMinX := r.Min.X / p.TileSize.X
 	tMinY := r.Min.Y / p.TileSize.Y
-	tMaxX := (r.Min.X + r.Dx() + p.TileSize.X - 1) / p.TileSize.X
-	tMaxY := (r.Min.Y + r.Dy() + p.TileSize.Y - 1) / p.TileSize.Y
+	tMaxX := (r.Max.X + p.TileSize.X - 1) / p.TileSize.X
+	tMaxY := (r.Max.Y + p.TileSize.Y - 1) / p.TileSize.Y
 
 	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
@@ -276,38 +272,65 @@ func (p *Image) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 			}
 		}
 
-		x, dx = minX/2, maxX/2-minX/2
-		y, dy = minY/2, maxY/2-minY/2
+		x, dx = (minX+1)/2, (maxX-minX+1)/2
+		y, dy = (minY+1)/2, (maxY-minY+1)/2
 		level--
 	}
 	return
 }
 
 func (p *Image) updateParentTile(level, col, row int) (err error) {
-	parent, child := p.GetTile(level-1, col/2, row/2), p.GetTile(level, col, row)
 	switch {
 	case col%2 == 0 && row%2 == 0:
 		draw_ext.DrawPyrDown(
-			parent, image.Rect((p.TileSize.X/2)*0, (p.TileSize.Y/2)*0, p.TileSize.X/2, p.TileSize.Y/2),
-			child, image.Pt(0, 0),
+			p.GetTile(level-1, col/2, row/2),
+			image.Rect(
+				(p.TileSize.X/2)*0,
+				(p.TileSize.Y/2)*0,
+				(p.TileSize.X/2)*0+p.TileSize.X/2,
+				(p.TileSize.Y/2)*0+p.TileSize.Y/2,
+			),
+			p.GetTile(level, col, row),
+			image.Pt(0, 0),
 			draw_ext.Filter_Average,
 		)
 	case col%2 == 0 && row%2 == 1:
 		draw_ext.DrawPyrDown(
-			parent, image.Rect((p.TileSize.X/2)*0, (p.TileSize.Y/2)*1, p.TileSize.X/2, p.TileSize.Y/2),
-			child, image.Pt(0, 0),
+			p.GetTile(level-1, col/2, row/2),
+			image.Rect(
+				(p.TileSize.X/2)*0,
+				(p.TileSize.Y/2)*1,
+				(p.TileSize.X/2)*0+p.TileSize.X/2,
+				(p.TileSize.Y/2)*1+p.TileSize.Y/2,
+			),
+			p.GetTile(level, col, row),
+			image.Pt(0, 0),
 			draw_ext.Filter_Average,
 		)
 	case col%2 == 1 && row%2 == 1:
 		draw_ext.DrawPyrDown(
-			parent, image.Rect((p.TileSize.X/2)*1, (p.TileSize.Y/2)*1, p.TileSize.X/2, p.TileSize.Y/2),
-			child, image.Pt(0, 0),
+			p.GetTile(level-1, col/2, row/2),
+			image.Rect(
+				(p.TileSize.X/2)*1,
+				(p.TileSize.Y/2)*1,
+				(p.TileSize.X/2)*1+p.TileSize.X/2,
+				(p.TileSize.Y/2)*1+p.TileSize.Y/2,
+			),
+			p.GetTile(level, col, row),
+			image.Pt(0, 0),
 			draw_ext.Filter_Average,
 		)
 	case col%2 == 1 && row%2 == 0:
 		draw_ext.DrawPyrDown(
-			parent, image.Rect((p.TileSize.X/2)*1, (p.TileSize.Y/2)*0, p.TileSize.X/2, p.TileSize.Y/2),
-			child, image.Pt(0, 0),
+			p.GetTile(level-1, col/2, row/2),
+			image.Rect(
+				(p.TileSize.X/2)*1,
+				(p.TileSize.Y/2)*0,
+				(p.TileSize.X/2)*1+p.TileSize.X/2,
+				(p.TileSize.Y/2)*0+p.TileSize.Y/2,
+			),
+			p.GetTile(level, col, row),
+			image.Pt(0, 0),
 			draw_ext.Filter_Average,
 		)
 	}

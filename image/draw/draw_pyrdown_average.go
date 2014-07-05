@@ -20,8 +20,8 @@ func drawPyrDownGray_Average(dst *image.Gray, r image.Rectangle, src image.Image
 	case *image.Gray:
 		// 64 is a magic, see go test -bench=.
 		if r.Dx() >= 64 && r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
-			drawPyrDownGray_Average_fast(dst, r, src, sp)
-			return
+			//drawPyrDownGray_Average_fast(dst, r, src, sp)
+			//return
 		}
 		drawPyrDownGray_Average_slow(dst, r, src, sp)
 		return
@@ -148,8 +148,8 @@ func drawPyrDownRGBA_Average(dst *image.RGBA, r image.Rectangle, src image.Image
 	case *image.RGBA:
 		// 32 is a magic, see go test -bench=.
 		if r.Dx() >= 32 && r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
-			drawPyrDownRGBA_Average_fast(dst, r, src, sp)
-			return
+			//drawPyrDownRGBA_Average_fast(dst, r, src, sp)
+			//return
 		}
 		drawPyrDownRGBA_Average_slow(dst, r, src, sp)
 		return

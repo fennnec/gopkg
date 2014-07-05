@@ -139,8 +139,8 @@ func (p *Dem) ReadRect(r image.Rectangle, level int) (m *image_ext.Gray32f, err 
 
 	tMinX := r.Min.X / p.TileSize.X
 	tMinY := r.Min.Y / p.TileSize.Y
-	tMaxX := (r.Min.X + r.Dx() + p.TileSize.X - 1) / p.TileSize.X
-	tMaxY := (r.Min.Y + r.Dy() + p.TileSize.Y - 1) / p.TileSize.Y
+	tMaxX := (r.Max.X + p.TileSize.X - 1) / p.TileSize.X
+	tMaxY := (r.Max.Y + p.TileSize.Y - 1) / p.TileSize.Y
 
 	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
@@ -149,7 +149,7 @@ func (p *Dem) ReadRect(r image.Rectangle, level int) (m *image_ext.Gray32f, err 
 		tMaxY = max
 	}
 
-	m = newDemTile(p.TileSize, p.ZeroValue)
+	m = newDemTile(r.Size(), p.ZeroValue)
 	for col := tMinX; col < tMaxX; col++ {
 		for row := tMinY; row < tMaxY; row++ {
 			p.readRectFromTile(m, p.GetTile(level, col, row), r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
@@ -181,9 +181,9 @@ func (p *Dem) readRectFromTile(dst, tile *image_ext.Gray32f, x, y, dx, dy, col, 
 	draw_ext.Draw(
 		dst, image.Rect(
 			zMinX-bMinX,
-			zMinX-tMinX,
-			zMaxX-zMinX,
-			zMaxY-zMinY,
+			zMinY-bMinX,
+			zMaxX-bMinX,
+			zMaxY-bMinY,
 		),
 		tile, image.Pt(
 			zMinX-tMinX,
@@ -202,8 +202,8 @@ func (p *Dem) WriteRect(r image.Rectangle, m *image_ext.Gray32f, level int) (err
 
 	tMinX := r.Min.X / p.TileSize.X
 	tMinY := r.Min.Y / p.TileSize.Y
-	tMaxX := (r.Min.X + r.Dx() + p.TileSize.X - 1) / p.TileSize.X
-	tMaxY := (r.Min.Y + r.Dy() + p.TileSize.Y - 1) / p.TileSize.Y
+	tMaxX := (r.Max.X + p.TileSize.X - 1) / p.TileSize.X
+	tMaxY := (r.Max.Y + p.TileSize.Y - 1) / p.TileSize.Y
 
 	if max := p.TilesAcross(level); tMaxX > max {
 		tMaxX = max
