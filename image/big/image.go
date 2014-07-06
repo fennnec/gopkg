@@ -122,7 +122,7 @@ func (p *Image) SetTile(level, col, row int, m draw.Image) (err error) {
 
 func (p *Image) ReadRect(r image.Rectangle, level int) (m image.Image, err error) {
 	level = p.adjustLevel(level)
-	if !r.In(p.Bounds()) || level < 0 || level >= p.Levels() {
+	if level < 0 || level >= p.Levels() {
 		err = fmt.Errorf("image/big: Image.ReadRect, rect = %v, level = %d", r, level)
 		return
 	}
@@ -186,8 +186,12 @@ func (p *Image) readRectFromTile(dst, tile draw.Image, x, y, dx, dy, col, row in
 
 func (p *Image) WriteRect(r image.Rectangle, m image.Image, level int) (err error) {
 	level = p.adjustLevel(level)
-	if !r.In(p.Bounds()) || level < 0 || level >= p.Levels() {
-		err = fmt.Errorf("image/big: Image.WriteRect, rect = %v, level = %v", r, level)
+	r = r.Intersect(p.Bounds())
+	if level < 0 || level >= p.Levels() {
+		err = fmt.Errorf("image/big: Image.WriteRect, level = %v", level)
+		return
+	}
+	if r.Empty() {
 		return
 	}
 
