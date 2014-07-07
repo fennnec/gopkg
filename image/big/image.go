@@ -51,6 +51,7 @@ func (p *Image) SubLevels(levels int) *Image {
 		TileSize: p.TileSize,
 		Rect:     r,
 		Model:    p.Model,
+		mu:       p.mu,
 	}
 }
 
