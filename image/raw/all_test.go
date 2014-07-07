@@ -91,12 +91,12 @@ func TestEncodeAndDecode(t *testing.T) {
 		encoder := Encoder{v.Channels, v.DataType}
 		decoder := Decoder{v.Channels, v.DataType, v.Image.Bounds().Dx(), v.Image.Bounds().Dy()}
 
-		data, err := encoder.Encode(v.Image)
+		data, err := encoder.Encode(v.Image, nil)
 		if err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
 
-		m, err := decoder.Decode(data)
+		m, err := decoder.Decode(data, nil)
 		if err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
@@ -115,16 +115,16 @@ func TestEncodeAndDecode_YCbCr2Gray(t *testing.T) {
 	encoder := Encoder{1, reflect.Uint8}
 	decoder := Decoder{1, reflect.Uint8, yuv.Bounds().Dx(), yuv.Bounds().Dy()}
 
-	data, err := encoder.Encode(yuv)
+	data, err := encoder.Encode(yuv, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	m0, err := decoder.Decode(data)
+	m0, err := decoder.Decode(data, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 
-	m1, err := decoder.DecodeImage(yuv)
+	m1, err := decoder.DecodeImage(yuv, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -169,16 +169,16 @@ func TestEncodeAndDecode_YCbCr2RGB(t *testing.T) {
 	encoder := Encoder{3, reflect.Uint8}
 	decoder := Decoder{3, reflect.Uint8, yuv.Bounds().Dx(), yuv.Bounds().Dy()}
 
-	data, err := encoder.Encode(yuv)
+	data, err := encoder.Encode(yuv, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	m0, err := decoder.Decode(data)
+	m0, err := decoder.Decode(data, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 
-	m1, err := decoder.DecodeImage(yuv)
+	m1, err := decoder.DecodeImage(yuv, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -224,16 +224,16 @@ func TestEncodeAndDecode_YCbCr2RGBA(t *testing.T) {
 	encoder := Encoder{4, reflect.Uint8}
 	decoder := Decoder{4, reflect.Uint8, yuv.Bounds().Dx(), yuv.Bounds().Dy()}
 
-	data, err := encoder.Encode(yuv)
+	data, err := encoder.Encode(yuv, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
-	m0, err := decoder.Decode(data)
+	m0, err := decoder.Decode(data, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 
-	m1, err := decoder.DecodeImage(yuv)
+	m1, err := decoder.DecodeImage(yuv, nil)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}

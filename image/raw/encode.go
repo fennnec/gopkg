@@ -19,38 +19,38 @@ type Encoder struct {
 	DataType reflect.Kind // Uint8/Uint16/Float32
 }
 
-func (p *Encoder) Encode(m image.Image) (data []byte, err error) {
+func (p *Encoder) Encode(m image.Image, buf []byte) (data []byte, err error) {
 	// Gray/Gray16/Gray32f
 	if p.Channels == 1 && p.DataType == reflect.Uint8 {
-		return p.encodeGray(m)
+		return p.encodeGray(m, buf)
 	}
 	if p.Channels == 1 && p.DataType == reflect.Uint16 {
-		return p.encodeGray16(m)
+		return p.encodeGray16(m, buf)
 	}
 	if p.Channels == 1 && p.DataType == reflect.Float32 {
-		return p.encodeGray32f(m)
+		return p.encodeGray32f(m, buf)
 	}
 
 	// RGB/RGB48/RGB96f
 	if p.Channels == 3 && p.DataType == reflect.Uint8 {
-		return p.encodeRGB(m)
+		return p.encodeRGB(m, buf)
 	}
 	if p.Channels == 3 && p.DataType == reflect.Uint16 {
-		return p.encodeRGB48(m)
+		return p.encodeRGB48(m, buf)
 	}
 	if p.Channels == 3 && p.DataType == reflect.Float32 {
-		return p.encodeRGB96f(m)
+		return p.encodeRGB96f(m, buf)
 	}
 
 	// RGBA/RGBA64/RGBA128f
 	if p.Channels == 4 && p.DataType == reflect.Uint8 {
-		return p.encodeRGBA(m)
+		return p.encodeRGBA(m, buf)
 	}
 	if p.Channels == 4 && p.DataType == reflect.Uint16 {
-		return p.encodeRGBA64(m)
+		return p.encodeRGBA64(m, buf)
 	}
 	if p.Channels == 4 && p.DataType == reflect.Float32 {
-		return p.encodeRGBA128f(m)
+		return p.encodeRGBA128f(m, buf)
 	}
 
 	// Unknown
@@ -58,9 +58,9 @@ func (p *Encoder) Encode(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeGray(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeGray(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy())
+	d := newBytes(b.Dx()*b.Dy(), buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -95,9 +95,9 @@ func (p *Encoder) encodeGray(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeGray16(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeGray16(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*2)
+	d := newBytes(b.Dx()*b.Dy()*2, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -139,9 +139,9 @@ func (p *Encoder) encodeGray16(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeGray32f(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeGray32f(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*4)
+	d := newBytes(b.Dx()*b.Dy()*4, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -201,9 +201,9 @@ func (p *Encoder) encodeGray32f(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeRGB(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeRGB(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*3)
+	d := newBytes(b.Dx()*b.Dy()*3, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -266,9 +266,9 @@ func (p *Encoder) encodeRGB(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeRGB48(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeRGB48(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*6)
+	d := newBytes(b.Dx()*b.Dy()*6, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -342,9 +342,9 @@ func (p *Encoder) encodeRGB48(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeRGB96f(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeRGB96f(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*12)
+	d := newBytes(b.Dx()*b.Dy()*12, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -440,9 +440,9 @@ func (p *Encoder) encodeRGB96f(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeRGBA(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeRGBA(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*4)
+	d := newBytes(b.Dx()*b.Dy()*4, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -516,9 +516,9 @@ func (p *Encoder) encodeRGBA(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeRGBA64(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeRGBA64(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*8)
+	d := newBytes(b.Dx()*b.Dy()*8, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0
@@ -598,9 +598,9 @@ func (p *Encoder) encodeRGBA64(m image.Image) (data []byte, err error) {
 	return
 }
 
-func (p *Encoder) encodeRGBA128f(m image.Image) (data []byte, err error) {
+func (p *Encoder) encodeRGBA128f(m image.Image, buf []byte) (data []byte, err error) {
 	b := m.Bounds()
-	d := make([]byte, b.Dx()*b.Dy()*16)
+	d := newBytes(b.Dx()*b.Dy()*16, buf)
 	switch m := m.(type) {
 	case *image.Gray:
 		var off = 0

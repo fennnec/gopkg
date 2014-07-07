@@ -126,7 +126,7 @@ func (p *Dem) SetTile(level, col, row int, m *image_ext.Gray32f) (err error) {
 	return
 }
 
-func (p *Dem) ReadRect(r image.Rectangle, level int) (m *image_ext.Gray32f, err error) {
+func (p *Dem) ReadRect(level int, r image.Rectangle, buf *image_ext.Gray32f) (m *image_ext.Gray32f, err error) {
 	level = p.adjustLevel(level)
 	if !r.In(p.Bounds()) {
 		err = fmt.Errorf("image/big: Dem.ReadRect, r = %v, level = %v", r, level)
@@ -193,7 +193,7 @@ func (p *Dem) readRectFromTile(dst, tile *image_ext.Gray32f, x, y, dx, dy, col, 
 	return
 }
 
-func (p *Dem) WriteRect(r image.Rectangle, m *image_ext.Gray32f, level int) (err error) {
+func (p *Dem) WriteRect(level int, r image.Rectangle, m *image_ext.Gray32f) (err error) {
 	level = p.adjustLevel(level)
 	if !r.In(p.Bounds()) || level < 0 || level >= p.Levels() {
 		err = fmt.Errorf("image/big: Dem.WriteRect, r = %v, level = %v", r, level)

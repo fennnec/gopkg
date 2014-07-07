@@ -74,7 +74,7 @@ func makeDemTileMap(r image.Rectangle, tileSize image.Point) (tileMap [][][]*ima
 	return
 }
 
-func newImageTile(tileSize image.Point, model color.Model) draw.Image {
+func newImageTile(tileSize image.Point, model color.Model) image_ext.ImageBuffer {
 	switch model {
 	case color.GrayModel:
 		return image.NewGray(image.Rect(0, 0, tileSize.X, tileSize.Y))

@@ -55,7 +55,7 @@ func main() {
 	saveImage("output/lena.jpg", bigImg)
 	for level := 0; level < bigImg.Levels(); level++ {
 		sub := bigImg.SubLevels(level + 1)
-		m, _ := sub.ReadRect(sub.Bounds(), level)
+		m, _ := sub.ReadRect(sub.Bounds(), level, nil)
 		saveImage(
 			fmt.Sprintf("output/lena-levels-%d-by-ReadRect.jpg", level+1),
 			m,

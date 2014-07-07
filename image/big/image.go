@@ -9,15 +9,18 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"sync"
 
+	image_ext "github.com/chai2010/gopkg/image"
 	draw_ext "github.com/chai2010/gopkg/image/draw"
 )
 
 type Image struct {
-	TileMap  [][][]draw.Image // m.TileMap[level][col][row]
 	TileSize image.Point
-	Rect     image.Rectangle
 	Model    color.Model // Gray/Gray16/Gray32f/RGBA/RGBA64/RGBA128f
+	Rect     image.Rectangle
+	tileMap  [][][]draw.Image // m.tileMap[level][col][row]
+	mu       sync.Mutex
 }
 
 func NewImage(r image.Rectangle, tileSize image.Point, model color.Model) *Image {
@@ -28,7 +31,7 @@ func NewImage(r image.Rectangle, tileSize image.Point, model color.Model) *Image
 		panic(fmt.Errorf("image/big: NewImage, bad color model: %T", model))
 	}
 	return &Image{
-		TileMap:  makeImageTileMap(r, tileSize),
+		tileMap:  makeImageTileMap(r, tileSize),
 		TileSize: tileSize,
 		Rect:     r,
 		Model:    model,
@@ -44,7 +47,7 @@ func (p *Image) SubLevels(levels int) *Image {
 		r.Max.Y /= 2
 	}
 	return &Image{
-		TileMap:  p.TileMap[:levels],
+		tileMap:  p.tileMap[:levels],
 		TileSize: p.TileSize,
 		Rect:     r,
 		Model:    p.Model,
@@ -74,7 +77,7 @@ func (p *Image) Set(x, y int, c color.Color) {
 }
 
 func (p *Image) Levels() int {
-	return len(p.TileMap)
+	return len(p.tileMap)
 }
 
 func (p *Image) adjustLevel(level int) int {
@@ -86,27 +89,31 @@ func (p *Image) adjustLevel(level int) int {
 
 func (p *Image) TilesAcross(level int) int {
 	level = p.adjustLevel(level)
-	v := len(p.TileMap[level])
+	v := len(p.tileMap[level])
 	return v
 }
 
 func (p *Image) TilesDown(level int) int {
 	level = p.adjustLevel(level)
-	v := len(p.TileMap[level][0])
+	v := len(p.tileMap[level][0])
 	return v
 }
 
 func (p *Image) GetTile(level, col, row int) (m draw.Image) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	level = p.adjustLevel(level)
-	if m = p.TileMap[level][col][row]; m != nil {
+	if m = p.tileMap[level][col][row]; m != nil {
 		return
 	}
 	m = newImageTile(p.TileSize, p.Model)
-	p.TileMap[level][col][row] = m
+	p.tileMap[level][col][row] = m
 	return
 }
 
 func (p *Image) SetTile(level, col, row int, m draw.Image) (err error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	level = p.adjustLevel(level)
 	if m.Bounds() != image.Rect(0, 0, p.TileSize.X, p.TileSize.Y) {
 		err = fmt.Errorf("image/big: Image.SetTile, bad bound size: %v", m.Bounds())
@@ -116,11 +123,11 @@ func (p *Image) SetTile(level, col, row int, m draw.Image) (err error) {
 		err = fmt.Errorf("image/big: Image.SetTile, bad color model: %T", m.ColorModel())
 		return
 	}
-	p.TileMap[level][col][row] = m
+	p.tileMap[level][col][row] = m
 	return
 }
 
-func (p *Image) ReadRect(r image.Rectangle, level int) (m image.Image, err error) {
+func (p *Image) ReadRect(level int, r image.Rectangle, buf image_ext.ImageBuffer) (m image.Image, err error) {
 	level = p.adjustLevel(level)
 	if level < 0 || level >= p.Levels() {
 		err = fmt.Errorf("image/big: Image.ReadRect, rect = %v, level = %d", r, level)
@@ -139,13 +146,22 @@ func (p *Image) ReadRect(r image.Rectangle, level int) (m image.Image, err error
 		tMaxY = max
 	}
 
-	dst := newImageTile(r.Size(), p.Model)
+	if buf == nil {
+		buf = newImageTile(r.Size(), p.Model)
+	}
+
+	var wg sync.WaitGroup
 	for col := tMinX; col < tMaxX; col++ {
 		for row := tMinY; row < tMaxY; row++ {
-			p.readRectFromTile(dst, p.GetTile(level, col, row), r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
+			wg.Add(1)
+			go func(level, col, row int) {
+				p.readRectFromTile(buf, p.GetTile(level, col, row), r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
+				wg.Done()
+			}(level, col, row)
 		}
 	}
-	m = dst
+	wg.Wait()
+	m = buf.SubImage(r)
 	return
 }
 
@@ -184,7 +200,7 @@ func (p *Image) readRectFromTile(dst, tile draw.Image, x, y, dx, dy, col, row in
 	return
 }
 
-func (p *Image) WriteRect(r image.Rectangle, m image.Image, level int) (err error) {
+func (p *Image) WriteRect(level int, r image.Rectangle, m image.Image) (err error) {
 	level = p.adjustLevel(level)
 	r = r.Intersect(p.Bounds())
 	if level < 0 || level >= p.Levels() {
@@ -207,11 +223,17 @@ func (p *Image) WriteRect(r image.Rectangle, m image.Image, level int) (err erro
 		tMaxY = max
 	}
 
+	var wg sync.WaitGroup
 	for col := tMinX; col < tMaxX; col++ {
 		for row := tMinY; row < tMaxY; row++ {
-			p.writeRectToTile(p.GetTile(level, col, row), m, r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
+			wg.Add(1)
+			go func(level, col, row int) {
+				p.writeRectToTile(p.GetTile(level, col, row), m, r.Min.X, r.Min.Y, r.Dx(), r.Dy(), col, row)
+				wg.Done()
+			}(level, col, row)
 		}
 	}
+	wg.Wait()
 
 	err = p.updateRectPyramid(level, r.Min.X, r.Min.Y, r.Dx(), r.Dy())
 	return
@@ -262,6 +284,7 @@ func (p *Image) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 		tMaxCol := maxX / p.TileSize.X
 		tMaxRow := maxY / p.TileSize.Y
 
+		var wg sync.WaitGroup
 		for row := tMinRow; row <= tMaxRow; row++ {
 			if row >= p.TilesDown(level) {
 				continue
@@ -270,11 +293,14 @@ func (p *Image) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 				if col >= p.TilesAcross(level) {
 					continue
 				}
-				if err = p.updateParentTile(level, col, row); err != nil {
-					return
-				}
+				wg.Add(1)
+				go func(level, col, row int) {
+					p.updateParentTile(level, col, row)
+					wg.Done()
+				}(level, col, row)
 			}
 		}
+		wg.Wait()
 
 		x, dx = (minX+1)/2, (maxX-minX+1)/2
 		y, dy = (minY+1)/2, (maxY-minY+1)/2

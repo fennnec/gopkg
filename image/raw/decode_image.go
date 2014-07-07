@@ -15,38 +15,38 @@ import (
 	color_ext "github.com/chai2010/gopkg/image/color"
 )
 
-func (p *Decoder) DecodeImage(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) DecodeImage(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	// Gray/Gray16/Gray32f
 	if p.Channels == 1 && p.DataType == reflect.Uint8 {
-		return p.decodeImageGray(data)
+		return p.decodeImageGray(data, buf)
 	}
 	if p.Channels == 1 && p.DataType == reflect.Uint16 {
-		return p.decodeImageGray16(data)
+		return p.decodeImageGray16(data, buf)
 	}
 	if p.Channels == 1 && p.DataType == reflect.Float32 {
-		return p.decodeImageGray32f(data)
+		return p.decodeImageGray32f(data, buf)
 	}
 
 	// RGB/RGB48/RGB96f
 	if p.Channels == 3 && p.DataType == reflect.Uint8 {
-		return p.decodeImageRGB(data)
+		return p.decodeImageRGB(data, buf)
 	}
 	if p.Channels == 3 && p.DataType == reflect.Uint16 {
-		return p.decodeImageRGB48(data)
+		return p.decodeImageRGB48(data, buf)
 	}
 	if p.Channels == 3 && p.DataType == reflect.Float32 {
-		return p.decodeImageRGB96f(data)
+		return p.decodeImageRGB96f(data, buf)
 	}
 
 	// RGBA/RGBA64/RGBA128f
 	if p.Channels == 4 && p.DataType == reflect.Uint8 {
-		return p.decodeImageRGBA(data)
+		return p.decodeImageRGBA(data, buf)
 	}
 	if p.Channels == 4 && p.DataType == reflect.Uint16 {
-		return p.decodeImageRGBA64(data)
+		return p.decodeImageRGBA64(data, buf)
 	}
 	if p.Channels == 4 && p.DataType == reflect.Float32 {
-		return p.decodeImageRGBA128f(data)
+		return p.decodeImageRGBA128f(data, buf)
 	}
 
 	// Unknown
@@ -57,7 +57,7 @@ func (p *Decoder) DecodeImage(data image.Image) (m draw.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageGray(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageGray(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -65,7 +65,7 @@ func (p *Decoder) decodeImageGray(data image.Image) (m draw.Image, err error) {
 	if m, ok := data.(*image.Gray); ok {
 		return m, nil
 	}
-	gray := image.NewGray(image.Rect(0, 0, p.Width, p.Height))
+	gray := newGray(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray16:
 		for y := 0; y < p.Height; y++ {
@@ -104,7 +104,7 @@ func (p *Decoder) decodeImageGray(data image.Image) (m draw.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageGray16(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageGray16(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -112,7 +112,7 @@ func (p *Decoder) decodeImageGray16(data image.Image) (m draw.Image, err error) 
 	if m, ok := data.(*image.Gray16); ok {
 		return m, nil
 	}
-	gray16 := image.NewGray16(image.Rect(0, 0, p.Width, p.Height))
+	gray16 := newGray16(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
@@ -155,7 +155,7 @@ func (p *Decoder) decodeImageGray16(data image.Image) (m draw.Image, err error) 
 	return
 }
 
-func (p *Decoder) decodeImageGray32f(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageGray32f(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -163,7 +163,7 @@ func (p *Decoder) decodeImageGray32f(data image.Image) (m draw.Image, err error)
 	if m, ok := data.(*image_ext.Gray32f); ok {
 		return m, nil
 	}
-	gray32f := image_ext.NewGray32f(image.Rect(0, 0, p.Width, p.Height))
+	gray32f := newGray32f(image.Rect(0, 0, p.Width, p.Height), buf)
 	for y := 0; y < p.Height; y++ {
 		for x := 0; x < p.Width; x++ {
 			gray32f.Set(x, y, data.At(x, y))
@@ -173,7 +173,7 @@ func (p *Decoder) decodeImageGray32f(data image.Image) (m draw.Image, err error)
 	return
 }
 
-func (p *Decoder) decodeImageRGB(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageRGB(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -181,7 +181,7 @@ func (p *Decoder) decodeImageRGB(data image.Image) (m draw.Image, err error) {
 	if m, ok := data.(*image.RGBA); ok {
 		return m, nil
 	}
-	rgba := image.NewRGBA(image.Rect(0, 0, p.Width, p.Height))
+	rgba := newRGBA(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
@@ -218,7 +218,7 @@ func (p *Decoder) decodeImageRGB(data image.Image) (m draw.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageRGB48(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageRGB48(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -226,7 +226,7 @@ func (p *Decoder) decodeImageRGB48(data image.Image) (m draw.Image, err error) {
 	if m, ok := data.(*image.RGBA64); ok {
 		return m, nil
 	}
-	rgba64 := image.NewRGBA64(image.Rect(0, 0, p.Width, p.Height))
+	rgba64 := newRGBA64(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
@@ -263,7 +263,7 @@ func (p *Decoder) decodeImageRGB48(data image.Image) (m draw.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageRGB96f(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageRGB96f(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -271,7 +271,7 @@ func (p *Decoder) decodeImageRGB96f(data image.Image) (m draw.Image, err error) 
 	if m, ok := data.(*image_ext.RGBA128f); ok {
 		return m, nil
 	}
-	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
+	rgba128f := newRGBA128f(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
@@ -308,7 +308,7 @@ func (p *Decoder) decodeImageRGB96f(data image.Image) (m draw.Image, err error) 
 	return
 }
 
-func (p *Decoder) decodeImageRGBA(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageRGBA(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -316,7 +316,7 @@ func (p *Decoder) decodeImageRGBA(data image.Image) (m draw.Image, err error) {
 	if m, ok := data.(*image.RGBA); ok {
 		return m, nil
 	}
-	rgba := image.NewRGBA(image.Rect(0, 0, p.Width, p.Height))
+	rgba := newRGBA(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
@@ -353,7 +353,7 @@ func (p *Decoder) decodeImageRGBA(data image.Image) (m draw.Image, err error) {
 	return
 }
 
-func (p *Decoder) decodeImageRGBA64(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageRGBA64(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -361,7 +361,7 @@ func (p *Decoder) decodeImageRGBA64(data image.Image) (m draw.Image, err error) 
 	if m, ok := data.(*image.RGBA64); ok {
 		return m, nil
 	}
-	rgba64 := image.NewRGBA64(image.Rect(0, 0, p.Width, p.Height))
+	rgba64 := newRGBA64(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
@@ -410,7 +410,7 @@ func (p *Decoder) decodeImageRGBA64(data image.Image) (m draw.Image, err error) 
 	return
 }
 
-func (p *Decoder) decodeImageRGBA128f(data image.Image) (m draw.Image, err error) {
+func (p *Decoder) decodeImageRGBA128f(data image.Image, buf image_ext.ImageBuffer) (m draw.Image, err error) {
 	if b := data.Bounds(); b.Dx() != p.Width || b.Dy() != p.Height {
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
@@ -418,7 +418,7 @@ func (p *Decoder) decodeImageRGBA128f(data image.Image) (m draw.Image, err error
 	if m, ok := data.(*image_ext.RGBA128f); ok {
 		return m, nil
 	}
-	rgba128f := image_ext.NewRGBA128f(image.Rect(0, 0, p.Width, p.Height))
+	rgba128f := newRGBA128f(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {

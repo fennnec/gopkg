@@ -5,7 +5,10 @@
 package raw
 
 import (
+	"image"
 	"reflect"
+
+	image_ext "github.com/chai2010/gopkg/image"
 )
 
 func defaultDepthKind(depth int) reflect.Kind {
@@ -18,4 +21,65 @@ func defaultDepthKind(depth int) reflect.Kind {
 		return reflect.Float32
 	}
 	return reflect.Uint16
+}
+
+func newBytes(size int, buf []byte) []byte {
+	if len(buf) >= size {
+		return buf[:size]
+	}
+	return make([]byte, size)
+}
+
+func newGray(r image.Rectangle, buf image_ext.ImageBuffer) *image.Gray {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image.Gray); ok {
+			return m
+		}
+	}
+	return image.NewGray(r)
+}
+
+func newGray16(r image.Rectangle, buf image_ext.ImageBuffer) *image.Gray16 {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image.Gray16); ok {
+			return m
+		}
+	}
+	return image.NewGray16(r)
+}
+
+func newGray32f(r image.Rectangle, buf image_ext.ImageBuffer) *image_ext.Gray32f {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image_ext.Gray32f); ok {
+			return m
+		}
+	}
+	return image_ext.NewGray32f(r)
+}
+
+func newRGBA(r image.Rectangle, buf image_ext.ImageBuffer) *image.RGBA {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image.RGBA); ok {
+			return m
+		}
+	}
+	return image.NewRGBA(r)
+}
+
+func newRGBA64(r image.Rectangle, buf image_ext.ImageBuffer) *image.RGBA64 {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image.RGBA64); ok {
+			return m
+		}
+	}
+	return image.NewRGBA64(r)
+}
+
+func newRGBA128f(r image.Rectangle, buf image_ext.ImageBuffer) *image_ext.RGBA128f {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image_ext.RGBA128f); ok {
+			return m
+		}
+	}
+	return image_ext.NewRGBA128f(r)
 }

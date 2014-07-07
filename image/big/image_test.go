@@ -69,7 +69,7 @@ func TestImage_readAndWrite(t *testing.T) {
 			t.Fatalf("%d: %v", i, err)
 		}
 
-		v.BgdImage.WriteRect(v.DrawRect, v.FgdImage, v.DrawLevel)
+		v.BgdImage.WriteRect(v.DrawLevel, v.DrawRect, v.FgdImage)
 		for j := 0; j < len(v.FgdRects); j++ {
 			err = tCheckImageColor(v.BgdImage, v.FgdRects[j], v.FgdColor, v.FgdLevels[j])
 			if err != nil {
