@@ -20,8 +20,8 @@ func drawPyrDownGray_Average(dst *image.Gray, r image.Rectangle, src image.Image
 	case *image.Gray:
 		// 64 is a magic, see go test -bench=.
 		if r.Dx() >= 64 && r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
-			//drawPyrDownGray_Average_fast(dst, r, src, sp)
-			//return
+			drawPyrDownGray_Average_fast(dst, r, src, sp)
+			return
 		}
 		drawPyrDownGray_Average_slow(dst, r, src, sp)
 		return
@@ -74,9 +74,9 @@ func drawPyrDownGray_Average_fast(dst *image.Gray, r image.Rectangle, src *image
 				y10 := uint16(src.Pix[off2:][j*4+k*2+0])
 				dst.Pix[off0:][i*4+k] = uint8((y00 + y01 + y11 + y10) / 4)
 			}
-			off0 += dst.Stride
-			off1 += src.Stride
-			off2 += src.Stride
+			off0 += dst.Stride * 1
+			off1 += src.Stride * 2
+			off2 += src.Stride * 2
 		}
 	} else {
 		for y := r.Min.Y; y < r.Max.Y; y++ {
@@ -90,9 +90,9 @@ func drawPyrDownGray_Average_fast(dst *image.Gray, r image.Rectangle, src *image
 					mergeRgbaFast(srcLine1[j+0], srcLine1[j+1]),
 				)
 			}
-			off0 += dst.Stride
-			off1 += src.Stride
-			off2 += src.Stride
+			off0 += dst.Stride * 1
+			off1 += src.Stride * 2
+			off2 += src.Stride * 2
 		}
 	}
 }
@@ -148,8 +148,8 @@ func drawPyrDownRGBA_Average(dst *image.RGBA, r image.Rectangle, src image.Image
 	case *image.RGBA:
 		// 32 is a magic, see go test -bench=.
 		if r.Dx() >= 32 && r.In(dst.Bounds()) && image.Rect(sp.X, sp.Y, sp.X+r.Dx()*2, sp.Y+r.Dy()*2).In(src.Bounds()) {
-			//drawPyrDownRGBA_Average_fast(dst, r, src, sp)
-			//return
+			drawPyrDownRGBA_Average_fast(dst, r, src, sp)
+			return
 		}
 		drawPyrDownRGBA_Average_slow(dst, r, src, sp)
 		return
@@ -196,9 +196,9 @@ func drawPyrDownRGBA_Average_fast(dst *image.RGBA, r image.Rectangle, src *image
 				mergeRgbaFast(srcLine1[j+0], srcLine1[j+1]),
 			)
 		}
-		off0 += dst.Stride
-		off1 += src.Stride
-		off2 += src.Stride
+		off0 += dst.Stride * 1
+		off1 += src.Stride * 2
+		off2 += src.Stride * 2
 	}
 }
 
