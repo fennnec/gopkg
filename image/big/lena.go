@@ -47,7 +47,7 @@ func main() {
 	lena := loadImage("../testdata/lena.jpg") // 512x512
 	bigImg := big.NewImage(image.Rect(0, 0, 512, 512), image.Pt(128, 128), color.RGBAModel)
 
-	if err := bigImg.WriteRect(lena.Bounds(), lena, -1); err != nil {
+	if err := bigImg.WriteRect(-1, lena.Bounds(), lena); err != nil {
 		log.Fatal(err)
 	}
 
@@ -55,7 +55,7 @@ func main() {
 	saveImage("output/lena.jpg", bigImg)
 	for level := 0; level < bigImg.Levels(); level++ {
 		sub := bigImg.SubLevels(level + 1)
-		m, _ := sub.ReadRect(sub.Bounds(), level, nil)
+		m, _ := sub.ReadRect(level, sub.Bounds(), nil)
 		saveImage(
 			fmt.Sprintf("output/lena-levels-%d-by-ReadRect.jpg", level+1),
 			m,
