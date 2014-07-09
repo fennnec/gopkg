@@ -236,7 +236,7 @@ func (p *Image) WriteRect(level int, r image.Rectangle, m image.Image) (err erro
 	}
 	wg.Wait()
 
-	err = p.updateRectPyramid(level, r.Min.X, r.Min.Y, r.Dx(), r.Dy())
+	p.updateRectPyramid(level, r.Min.X, r.Min.Y, r.Dx(), r.Dy())
 	return
 }
 
@@ -275,7 +275,7 @@ func (p *Image) writeRectToTile(tile draw.Image, src image.Image, x, y, dx, dy, 
 	return
 }
 
-func (p *Image) updateRectPyramid(level, x, y, dx, dy int) (err error) {
+func (p *Image) updateRectPyramid(level, x, y, dx, dy int) {
 	for level > 0 && dx > 0 && dy > 0 {
 		minX, minY := x, y
 		maxX, maxY := x+dx-1, y+dy-1
@@ -310,7 +310,7 @@ func (p *Image) updateRectPyramid(level, x, y, dx, dy int) (err error) {
 	return
 }
 
-func (p *Image) updateParentTile(level, col, row int) (err error) {
+func (p *Image) updateParentTile(level, col, row int) {
 	switch {
 	case col%2 == 0 && row%2 == 0:
 		draw_ext.DrawPyrDown(
@@ -365,5 +365,4 @@ func (p *Image) updateParentTile(level, col, row int) (err error) {
 			draw_ext.Filter_Average,
 		)
 	}
-	return
 }

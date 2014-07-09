@@ -70,6 +70,21 @@ func (lru *LRUCache) SetIfAbsent(key string, value interface{}, size int) {
 	}
 }
 
+func (lru *LRUCache) Take(key string) (v interface{}, ok bool) {
+	lru.mu.Lock()
+	defer lru.mu.Unlock()
+
+	element := lru.table[key]
+	if element == nil {
+		return nil, false
+	}
+
+	lru.list.Remove(element)
+	delete(lru.table, key)
+	lru.size -= uint64(element.Value.(*entry).size)
+	return element.Value.(*entry).value, true
+}
+
 func (lru *LRUCache) Delete(key string) bool {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()

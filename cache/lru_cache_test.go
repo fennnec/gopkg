@@ -121,6 +121,37 @@ func TestLRUGetNonExistent(t *testing.T) {
 	}
 }
 
+func TestLRUTake(t *testing.T) {
+	cache := NewLRUCache(100)
+	value := &IntCacheValue{1}
+	key := "key"
+
+	if cache.Delete(key) {
+		t.Error("Item unexpectedly already in cache.")
+	}
+
+	cache.Set(key, value, 0)
+
+	// first take
+	v, ok := cache.Take(key)
+	if !ok || v.(*IntCacheValue) != value {
+		t.Errorf("Cache has incorrect value: %v != %v", value, v)
+	}
+
+	// try again
+	if _, ok = cache.Take(key); ok {
+		t.Error("Cache returned a value after take.")
+	}
+
+	if _, sz, _, _ := cache.Stats(); sz != 0 {
+		t.Errorf("cache.Size() = %v, expected 0", sz)
+	}
+
+	if _, ok := cache.Get(key); ok {
+		t.Error("Cache returned a value after deletion.")
+	}
+}
+
 func TestLRUDelete(t *testing.T) {
 	cache := NewLRUCache(100)
 	value := &IntCacheValue{1}
