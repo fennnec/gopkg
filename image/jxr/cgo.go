@@ -21,6 +21,13 @@ import (
 	"unsafe"
 )
 
+type jxr_bool_t C.jxr_bool_t
+
+const (
+	jxr_true  = jxr_bool_t(C.jxr_true)
+	jxr_false = jxr_bool_t(C.jxr_false)
+)
+
 type jxr_data_type_t C.jxr_data_type_t
 
 const (
@@ -29,76 +36,89 @@ const (
 	jxr_float    = jxr_data_type_t(C.jxr_float)
 )
 
-func jxr_encode(
-	data []byte, width, height, channels, depth, quality, width_step int,
+func jxr_decode_config(data []byte) (
+	width, height, channels, depth C.int,
 	data_type jxr_data_type_t,
-	buf []byte,
-) (n int, err error) {
+	err error,
+) {
 	if len(data) == 0 {
-		err = fmt.Errorf("jxr_encode: bad arguments")
+		err = fmt.Errorf("jxr_decode_config: bad arguments")
 		return
 	}
-	// check size
-	if len(buf) == 0 {
-		n = int(C.jxr_encode(
-			(*C.char)(unsafe.Pointer(nil)), C.int(0),
-			(*C.char)(unsafe.Pointer(&data[0])), C.int(len(data)),
-			C.int(width), C.int(height), C.int(channels), C.int(depth),
-			C.int(quality), C.int(width_step),
-			C.jxr_data_type_t(data_type),
-		))
-		if n < 0 {
-			err = fmt.Errorf("jxr_encode: n = %d", n)
-			return
-		}
-	} else {
-		n = int(C.jxr_encode(
-			(*C.char)(unsafe.Pointer(&buf[0])), C.int(len(buf)),
-			(*C.char)(unsafe.Pointer(&data[0])), C.int(len(data)),
-			C.int(width), C.int(height), C.int(channels), C.int(depth),
-			C.int(quality), C.int(width_step),
-			C.jxr_data_type_t(data_type),
-		))
-		if n < 0 {
-			err = fmt.Errorf("jxr_encode: n = %d", n)
-			return
-		}
+	rv := jxr_bool_t(C.jxr_decode_config(
+		(*C.char)(unsafe.Pointer(&data[0])), C.int(len(data)),
+		(*C.int)(&width), (*C.int)(&height), (*C.int)(&channels), (*C.int)(&depth),
+		(*C.jxr_data_type_t)(&data_type),
+	))
+	if rv != jxr_true {
+		err = fmt.Errorf("jxr_decode_config: failed")
+		return
 	}
 	return
 }
 
-func jxr_decode(data, buf []byte) (
+func jxr_decode(data, pix []byte, stride int) (
 	width, height, channels, depth C.int,
 	data_type jxr_data_type_t,
-	n int, err error,
+	err error,
 ) {
 	if len(data) == 0 {
 		err = fmt.Errorf("jxr_decode: bad arguments")
 		return
 	}
-	// check size
-	if len(buf) == 0 {
-		n = int(C.jxr_decode(
-			(*C.char)(unsafe.Pointer(nil)), C.int(0),
-			(*C.char)(unsafe.Pointer(&data[0])), C.int(len(data)),
-			(*C.int)(&width), (*C.int)(&height), (*C.int)(&channels), (*C.int)(&depth),
-			(*C.jxr_data_type_t)(&data_type),
-		))
-		if n < 0 {
-			err = fmt.Errorf("jxr_decode: n = %d", n)
-			return
-		}
-	} else {
-		n = int(C.jxr_decode(
-			(*C.char)(unsafe.Pointer(&buf[0])), C.int(len(buf)),
-			(*C.char)(unsafe.Pointer(&data[0])), C.int(len(data)),
-			(*C.int)(&width), (*C.int)(&height), (*C.int)(&channels), (*C.int)(&depth),
-			(*C.jxr_data_type_t)(&data_type),
-		))
-		if n < 0 {
-			err = fmt.Errorf("jxr_decode: n = %d", n)
-			return
-		}
+	rv := jxr_bool_t(C.jxr_decode(
+		(*C.char)(unsafe.Pointer(&pix[0])), C.int(stride),
+		(*C.char)(unsafe.Pointer(&data[0])), C.int(len(data)),
+		(*C.int)(&width), (*C.int)(&height), (*C.int)(&channels), (*C.int)(&depth),
+		(*C.jxr_data_type_t)(&data_type),
+	))
+	if rv != jxr_true {
+		err = fmt.Errorf("jxr_decode: failed")
+		return
+	}
+	return
+}
+
+func jxr_encode_len(
+	pix []byte, stride int,
+	width, height, channels, depth, quality int,
+	data_type jxr_data_type_t,
+) (err error) {
+	if len(pix) == 0 {
+		err = fmt.Errorf("jxr_encode_len: bad arguments")
+		return
+	}
+	rv := jxr_bool_t(C.jxr_encode_len(
+		(*C.char)(unsafe.Pointer(&pix[0])), C.int(stride),
+		(C.int)(width), (C.int)(height), (C.int)(channels), (C.int)(depth), C.int(quality),
+		(C.jxr_data_type_t)(data_type),
+	))
+	if rv != jxr_true {
+		err = fmt.Errorf("jxr_encode_len: failed")
+		return
+	}
+	return
+}
+
+func jxr_encode(
+	buf, pix []byte, stride int,
+	width, height, channels, depth, quality int,
+	data_type jxr_data_type_t,
+) (newSize C.int, err error) {
+	if len(buf) == 0 || len(pix) == 0 {
+		err = fmt.Errorf("jxr_encode: bad arguments")
+		return
+	}
+	rv := jxr_bool_t(C.jxr_encode(
+		(*C.char)(unsafe.Pointer(&buf[0])), C.int(len(buf)),
+		(*C.char)(unsafe.Pointer(&pix[0])), C.int(stride),
+		C.int(width), C.int(height), C.int(channels), C.int(depth), C.int(quality),
+		C.jxr_data_type_t(data_type),
+		&newSize,
+	))
+	if rv != jxr_true {
+		err = fmt.Errorf("jxr_encode_len: failed")
+		return
 	}
 	return
 }

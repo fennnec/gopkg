@@ -64,6 +64,7 @@ set(JXR_SRC
   ./jxrlib/image/sys/perfTimerANSI.c
 
   ./jxrlib/src/jxr.c
+  ./jxrlib/src/jxr_private.c
 )
 
 add_library(jxrlib SHARED

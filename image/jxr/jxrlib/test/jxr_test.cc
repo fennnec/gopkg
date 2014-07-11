@@ -151,12 +151,13 @@ TEST(jxr, DecodeAndEncode) {
 	auto dst = new std::string;
 
 	for(int i = 0; i < TEST_DIM(testCaseJxr); ++i) {
-		bool rv = loadImageData(testCaseJxr[i].name, buf);
-		ASSERT_TRUE(rv);
-
-		// decode raw file data
 		int width, height, channels, depth;
 		jxr_data_type_t type;
+		int newSize;
+
+		// decode raw file data
+		bool rv = loadImageData(testCaseJxr[i].name, buf);
+		ASSERT_TRUE(rv);
 		src->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
 		int n = jxr_decode(
 			(char*)src->data(), 0, buf->data(), buf->size(),
@@ -174,14 +175,16 @@ TEST(jxr, DecodeAndEncode) {
 		n = jxr_encode(
 			(char*)buf->data(), buf->size(), src->data(), 0,
 			width, height, channels, depth,
-			90, jxr_unsigned
+			90, jxr_unsigned,
+			&newSize
 		);
 		ASSERT_TRUE(n == jxr_true);
+		ASSERT_TRUE(newSize > 0);
 
 		// decode again
 		dst->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
 		n = jxr_decode(
-			(char*)dst->data(), dst->size(), buf->data(), buf->size(),
+			(char*)dst->data(), dst->size(), buf->data(), newSize,
 			&width, &height, &channels, &depth, &type
 		);
 		ASSERT_TRUE(n == jxr_true);

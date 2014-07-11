@@ -12,4 +12,3 @@ go run builder.go -win32 -clean -dlldir=${CHAI2010_GOPKG_ROOT}/bin
 call %CHAI2010_GOPKG_ROOT%\src\register-vc2012-x64.bat
 go run builder.go -win64 -clean -dlldir=${CHAI2010_GOPKG_ROOT}/bin
 
-go install

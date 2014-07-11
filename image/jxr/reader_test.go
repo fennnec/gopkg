@@ -54,5 +54,37 @@ func TestDecode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	compare(t, img0, img1)
+	// Compare the average delta to the tolerance level.
+	want := int64(5 << 8)
+	if got := averageDelta(img0, img1); got > want {
+		t.Errorf("average delta too high; got %d, want <= %d", got, want)
+	}
+}
+
+// averageDelta returns the average delta in RGB space. The two images must
+// have the same bounds.
+func averageDelta(m0, m1 image.Image) int64 {
+	b := m0.Bounds()
+	var sum, n int64
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			c0 := m0.At(x, y)
+			c1 := m1.At(x, y)
+			r0, g0, b0, _ := c0.RGBA()
+			r1, g1, b1, _ := c1.RGBA()
+			sum += delta(r0, r1)
+			sum += delta(g0, g1)
+			sum += delta(b0, b1)
+			n += 3
+		}
+	}
+	return sum / n
+}
+
+func delta(u0, u1 uint32) int64 {
+	d := int64(u0) - int64(u1)
+	if d < 0 {
+		return -d
+	}
+	return d
 }

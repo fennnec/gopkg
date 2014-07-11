@@ -44,15 +44,16 @@ jxr_bool_t jxr_decode(
 );
 
 int jxr_encode_len(
-	const char* data, int stride,
+	const char* pix, int stride,
 	int width, int height, int channels, int depth,
 	int quality, jxr_data_type_t type
 );
 
 jxr_bool_t jxr_encode(
-	char* buf, int buf_len, const char* data, int stride,
+	char* buf, int buf_len, const char* pix, int stride,
 	int width, int height, int channels, int depth,
-	int quality, jxr_data_type_t type
+	int quality, jxr_data_type_t type,
+	int* size
 );
 
 // ----------------------------------------------------------------------------

@@ -97,7 +97,7 @@ jxr_bool_t jxr_decode(
 	if(stride <= 0) {
 		stride = (*width)*(*channels)*(*depth)/8;
 	}
-	if(stride > ((*width)*(*channels)*(*depth)/8)) {
+	if(stride < ((*width)*(*channels)*(*depth)/8)) {
 		rv = jxr_false;
 		goto Cleanup;
 	}
@@ -141,10 +141,11 @@ int jxr_encode_len(
 }
 
 jxr_bool_t jxr_encode(
-	char* buf, int buf_len, const char* data, int size,
+	char* buf, int buf_len, const char* data, int stride,
 	int width, int height, int channels, int depth,
 	int quality, int width_step,
-	jxr_data_type_t type
+	jxr_data_type_t type,
+	int* size
 ) {
 	return jxr_false;
 }

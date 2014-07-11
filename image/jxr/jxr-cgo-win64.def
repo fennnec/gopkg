@@ -1,5 +1,7 @@
 LIBRARY jxr-cgo-win64.dll
 
 EXPORTS
-jxr_encode
+jxr_decode_config
 jxr_decode
+jxr_encode_len
+jxr_encode
