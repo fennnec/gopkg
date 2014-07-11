@@ -13,6 +13,14 @@ extern "C" {
 // Exported types
 // ----------------------------------------------------------------------------
 
+typedef struct jxr_decoder_t jxr_decoder_t;
+typedef struct jxr_encoder_t jxr_encoder_t;
+
+typedef enum jxr_bool_t {
+	jxr_true  = 1,
+	jxr_false = 0,
+} jxr_bool_t;
+
 typedef enum jxr_data_type_t {
 	jxr_unsigned = 0,
 	jxr_signed = 1,
@@ -20,22 +28,65 @@ typedef enum jxr_data_type_t {
 } jxr_data_type_t;
 
 // ----------------------------------------------------------------------------
-// decode/encode
-// if(buf == NULL && buf_len == 0) return len(?);
+// decode/encode simple api
 // ----------------------------------------------------------------------------
 
-int jxr_encode(
-	char* buf, int buf_len, const char* data, int size,
-	int width, int height, int channels, int depth,
-	int quality, int width_step,
-	jxr_data_type_t type
-);
-
-int jxr_decode(
-	char* buf, int buf_len, const char* data, int size,
+jxr_bool_t jxr_decode_config(
+	const char* data, int size,
 	int* width, int* height, int* channels, int* depth,
 	jxr_data_type_t* type
 );
+
+jxr_bool_t jxr_decode(
+	char* buf, int stride, const char* data, int size,
+	int* width, int* height, int* channels, int* depth,
+	jxr_data_type_t* type
+);
+
+int jxr_encode_len(
+	const char* data, int stride,
+	int width, int height, int channels, int depth,
+	int quality, jxr_data_type_t type
+);
+
+jxr_bool_t jxr_encode(
+	char* buf, int buf_len, const char* data, int stride,
+	int width, int height, int channels, int depth,
+	int quality, jxr_data_type_t type
+);
+
+// ----------------------------------------------------------------------------
+// decoder
+// ----------------------------------------------------------------------------
+
+jxr_decoder_t* jxr_decoder_new();
+void jxr_decoder_delete(jxr_decoder_t* p);
+
+jxr_bool_t jxr_decoder_init(jxr_decoder_t* p, const char* data, int siz);
+
+int jxr_decoder_width(jxr_decoder_t* p);
+int jxr_decoder_height(jxr_decoder_t* p);
+int jxr_decoder_channels(jxr_decoder_t* p);
+int jxr_decoder_depth(jxr_decoder_t* p);
+int jxr_decoder_data_type(jxr_decoder_t* p);
+
+jxr_bool_t jxr_decoder_decode(jxr_decoder_t* p, char* buffer, int stride);
+
+// ----------------------------------------------------------------------------
+// encoder
+// ----------------------------------------------------------------------------
+
+jxr_encoder_t* jxr_encoder_new();
+void jxr_encoder_delete(jxr_encoder_t* p);
+
+jxr_bool_t jxr_encoder_init(jxr_encoder_t* p,
+	const char* data, int stride,
+	int width, int height, int channels, int depth,
+	int quality, jxr_data_type_t type
+);
+
+int jxr_decoder_need_buffer_size(jxr_encoder_t* p);
+jxr_bool_t jxr_decoder_encode(jxr_encoder_t* p, char* buffer);
 
 // ----------------------------------------------------------------------------
 // END

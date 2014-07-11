@@ -19,3 +19,11 @@ bool loadImageData(const char* name, std::string* data) {
 	return (n == data->size());
 }
 
+bool saveImageData(const char* name, const char* data, int size) {
+	FILE* fp = fopen(name, "wb");
+	if(!fp) return false;
+	int n = fwrite((void*)data, 1, size, fp);
+	fclose(fp);
+	return (n == size);
+}
+

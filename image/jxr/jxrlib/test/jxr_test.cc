@@ -31,7 +31,7 @@ static tImgInfo testCaseJxr[] = {
 	{ 3888, 2592, 3, 8, "testdata/SMALLTOMATO.wdp" },
 };
 
-TEST(jpg, Simple) {
+TEST(jxr, JpgHelper) {
 	auto buf = new std::string;
 	auto src = new std::string;
 	auto dst = new std::string;
@@ -73,7 +73,77 @@ TEST(jpg, Simple) {
 	delete dst;
 }
 
-TEST(jxr, Simple) {
+TEST(jxr, DecodeConfig) {
+	auto buf = new std::string;
+	for(int i = 0; i < TEST_DIM(testCaseJxr); ++i) {
+		bool rv = loadImageData(testCaseJxr[i].name, buf);
+		ASSERT_TRUE(rv);
+
+		// decode jxr data
+		int width, height, channels, depth;
+		jxr_data_type_t type;
+		jxr_bool_t ret = jxr_decode_config(buf->data(), buf->size(),
+			&width, &height, &channels, &depth, &type
+		);
+		ASSERT_TRUE(ret == jxr_true);
+		ASSERT_TRUE(width == testCaseJxr[i].width);
+		ASSERT_TRUE(height == testCaseJxr[i].height);
+		ASSERT_TRUE(channels == testCaseJxr[i].channels);
+		ASSERT_TRUE(depth == testCaseJxr[i].depth);
+	}
+	delete buf;
+}
+
+TEST(jxr, Decode) {
+	auto buf = new std::string;
+	auto src = new std::string;
+	auto dst = new std::string;
+
+	for(int i = 0; i < TEST_DIM(testCaseJxr); ++i) {
+		int width, height, channels, depth;
+		jxr_data_type_t type;
+
+		// decode jxr data
+		bool rv = loadImageData(testCaseJxr[i].name, buf);
+		ASSERT_TRUE(rv);
+		src->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
+		int n = jxr_decode(
+			(char*)src->data(), 0, buf->data(), buf->size(),
+			&width, &height, &channels, &depth, &type
+		);
+		ASSERT_TRUE(n == jxr_true);
+		ASSERT_TRUE(width == testCaseJxr[i].width);
+		ASSERT_TRUE(height == testCaseJxr[i].height);
+		ASSERT_TRUE(channels == testCaseJxr[i].channels);
+		ASSERT_TRUE(depth == testCaseJxr[i].depth);
+
+		// decode jpg data
+		rv = loadImageData(testCaseJpg[i].name, buf);
+		ASSERT_TRUE(rv);
+		rv = jpegDecode(dst, buf->data(), buf->size(), &width, &height, &channels);
+		ASSERT_TRUE(rv);
+		ASSERT_TRUE(width == testCaseJpg[i].width);
+		ASSERT_TRUE(height == testCaseJpg[i].height);
+		ASSERT_TRUE(channels == testCaseJpg[i].channels);
+
+		// compare
+		double diff = diffImageData(
+			(const unsigned char*)src->data(), (const unsigned char*)dst->data(),
+			width, height, channels
+		);
+		ASSERT_TRUE(diff < 20);
+	}
+
+	delete buf;
+	delete src;
+	delete dst;
+}
+
+TEST(jxr, Encode) {
+	//
+}
+
+TEST(jxr, DecodeAndEncode) {
 	return; // skip
 
 	auto buf = new std::string;
@@ -86,34 +156,35 @@ TEST(jxr, Simple) {
 
 		// decode raw file data
 		int width, height, channels, depth;
+		jxr_data_type_t type;
 		src->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
 		int n = jxr_decode(
-			(char*)src->data(), src->size(), buf->data(), buf->size(),
-			&width, &height, &channels, &depth, NULL
+			(char*)src->data(), 0, buf->data(), buf->size(),
+			&width, &height, &channels, &depth, &type
 		);
-		ASSERT_TRUE(n > 0);
+		ASSERT_TRUE(n == jxr_true);
 		ASSERT_TRUE(width == testCaseJxr[i].width);
 		ASSERT_TRUE(height == testCaseJxr[i].height);
 		ASSERT_TRUE(channels == testCaseJxr[i].channels);
 		ASSERT_TRUE(depth == testCaseJxr[i].depth);
 
-		// encode as jpg
+		// encode as jxr
 		buf->clear();
 		buf->resize(src->size());
 		n = jxr_encode(
-			(char*)buf->data(), buf->size(), src->data(), src->size(),
+			(char*)buf->data(), buf->size(), src->data(), 0,
 			width, height, channels, depth,
-			90, 0, jxr_unsigned
+			90, jxr_unsigned
 		);
-		ASSERT_TRUE(n > 0);
+		ASSERT_TRUE(n == jxr_true);
 
 		// decode again
 		dst->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
 		n = jxr_decode(
 			(char*)dst->data(), dst->size(), buf->data(), buf->size(),
-			&width, &height, &channels, &depth, NULL
+			&width, &height, &channels, &depth, &type
 		);
-		ASSERT_TRUE(n > 0);
+		ASSERT_TRUE(n == jxr_true);
 		ASSERT_TRUE(width == testCaseJxr[i].width);
 		ASSERT_TRUE(height == testCaseJxr[i].height);
 		ASSERT_TRUE(channels == testCaseJxr[i].channels);
@@ -146,3 +217,4 @@ TEST(jxr, CompareJxrJpg) {
 	// diff(jxr, jpg) < 20
 }
 
+// benchmark

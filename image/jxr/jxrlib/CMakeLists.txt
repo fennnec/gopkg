@@ -63,6 +63,7 @@ set(JXR_SRC
   ./image/sys/perfTimerANSI.c
 
   ./src/jxr.c
+  ./src/jxr_private.c
 )
 
 set(JXR_TEST_SRC

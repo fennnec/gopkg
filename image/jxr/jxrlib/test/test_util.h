@@ -27,6 +27,7 @@ bool jpegEncode(
 );
 
 bool loadImageData(const char* name, std::string* data);
+bool saveImageData(const char* name, const char* data, int size);
 
 template<typename T> double diffImageData(
 	const T* b0, const T* b1,
