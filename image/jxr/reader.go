@@ -123,10 +123,8 @@ func Decode(r io.Reader) (m image.Image, err error) {
 			for y := 0; y < b.Max.Y; y++ {
 				d := rgba.Pix[y*rgba.Stride:]
 				for x := b.Max.X - 1; x >= 0; x-- {
+					copy(d[x*4:][:3], d[x*3:])
 					d[x*4+3] = 0xff
-					d[x*4+2] = d[x*3+2]
-					d[x*4+1] = d[x*3+1]
-					d[x*4+0] = d[x*3+0]
 				}
 			}
 		}
@@ -141,14 +139,9 @@ func Decode(r io.Reader) (m image.Image, err error) {
 			for y := 0; y < b.Max.Y; y++ {
 				d := rgba64.Pix[y*rgba64.Stride:]
 				for x := b.Max.X - 1; x >= 0; x-- {
+					copy(d[x*8:][:6], d[x*6:])
 					d[x*8+7] = 0xff
 					d[x*8+6] = 0xff
-					d[x*8+5] = d[x*6+5]
-					d[x*8+4] = d[x*6+4]
-					d[x*8+3] = d[x*6+3]
-					d[x*8+2] = d[x*6+2]
-					d[x*8+1] = d[x*6+1]
-					d[x*8+0] = d[x*6+0]
 				}
 			}
 		}
@@ -163,10 +156,8 @@ func Decode(r io.Reader) (m image.Image, err error) {
 			for y := 0; y < b.Max.Y; y++ {
 				d := rgba128f.Pix[y*rgba128f.Stride:]
 				for x := b.Max.X - 1; x >= 0; x-- {
+					copy(d[x*8:][:6], d[x*6:])
 					builtin.PutFloat32(d[x*8+6:], 0xffff)
-					builtin.PutFloat32(d[x*8+4:], builtin.Float32(d[x*6:4]))
-					builtin.PutFloat32(d[x*8+2:], builtin.Float32(d[x*6:2]))
-					builtin.PutFloat32(d[x*8+0:], builtin.Float32(d[x*6:0]))
 				}
 			}
 		}

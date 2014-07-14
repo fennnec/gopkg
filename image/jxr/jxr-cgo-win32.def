@@ -1,7 +1,37 @@
+; Copyright 2014 <chaishushan{AT}gmail.com>. All rights reserved.
+; Use of this source code is governed by a BSD-style
+; license that can be found in the LICENSE file.
+
 LIBRARY jxr-cgo-win32.dll
 
 EXPORTS
+
+; simple api
+
 jxr_decode_config
 jxr_decode
 jxr_encode_len
 jxr_encode
+
+; decoder api
+
+jxr_decoder_new
+jxr_decoder_delete
+
+jxr_decoder_init
+jxr_decoder_decode
+
+jxr_decoder_width
+jxr_decoder_height
+jxr_decoder_channels
+jxr_decoder_depth
+jxr_decoder_data_type
+
+; encoder api
+
+jxr_encoder_new
+jxr_encoder_delete
+
+jxr_encoder_init
+jxr_encoder_need_buffer_size
+jxr_encoder_encode

@@ -108,7 +108,7 @@ TEST(jxr, Decode) {
 		ASSERT_TRUE(rv);
 		src->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
 		int n = jxr_decode(
-			(char*)src->data(), 0, buf->data(), buf->size(),
+			(char*)src->data(), src->size(), 0, buf->data(), buf->size(),
 			&width, &height, &channels, &depth, &type
 		);
 		ASSERT_TRUE(n == jxr_true);
@@ -160,7 +160,7 @@ TEST(jxr, DecodeAndEncode) {
 		ASSERT_TRUE(rv);
 		src->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
 		int n = jxr_decode(
-			(char*)src->data(), 0, buf->data(), buf->size(),
+			(char*)src->data(), src->size(), 0, buf->data(), buf->size(),
 			&width, &height, &channels, &depth, &type
 		);
 		ASSERT_TRUE(n == jxr_true);
@@ -184,7 +184,7 @@ TEST(jxr, DecodeAndEncode) {
 		// decode again
 		dst->resize(testCaseJxr[i].width*testCaseJxr[i].height*testCaseJxr[i].channels);
 		n = jxr_decode(
-			(char*)dst->data(), dst->size(), buf->data(), newSize,
+			(char*)dst->data(), dst->size(), 0, buf->data(), newSize,
 			&width, &height, &channels, &depth, &type
 		);
 		ASSERT_TRUE(n == jxr_true);

@@ -64,6 +64,8 @@ set(JXR_SRC
 
   ./src/jxr.c
   ./src/jxr_private.c
+  ./src/jxr_decode.c
+  ./src/jxr_encode.c
 )
 
 set(JXR_TEST_SRC

@@ -142,6 +142,7 @@ func (p *Decoder) decodeRGB(data []byte, buf image_ext.ImageBuffer) (m draw.Imag
 				R: data[off+0],
 				G: data[off+1],
 				B: data[off+2],
+				A: 0xff,
 			})
 			off += 3
 		}
@@ -164,6 +165,7 @@ func (p *Decoder) decodeRGB48(data []byte, buf image_ext.ImageBuffer) (m draw.Im
 				R: u16Pix[x*3+0],
 				G: u16Pix[x*3+1],
 				B: u16Pix[x*3+2],
+				A: 0xffff,
 			})
 		}
 		off += p.Width * 6

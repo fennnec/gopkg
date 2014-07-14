@@ -67,7 +67,7 @@ func jxr_decode(data, pix []byte, stride int) (
 		return
 	}
 	rv := jxr_bool_t(C.jxr_decode(
-		(*C.char)(unsafe.Pointer(&pix[0])), C.int(stride),
+		(*C.char)(unsafe.Pointer(&pix[0])), C.int(len(pix)), C.int(stride),
 		(*C.char)(unsafe.Pointer(&data[0])), C.int(len(data)),
 		(*C.int)(&width), (*C.int)(&height), (*C.int)(&channels), (*C.int)(&depth),
 		(*C.jxr_data_type_t)(&data_type),
@@ -83,7 +83,7 @@ func jxr_encode_len(
 	pix []byte, stride int,
 	width, height, channels, depth, quality int,
 	data_type jxr_data_type_t,
-) (err error) {
+) (size C.int, err error) {
 	if len(pix) == 0 {
 		err = fmt.Errorf("jxr_encode_len: bad arguments")
 		return
@@ -92,6 +92,7 @@ func jxr_encode_len(
 		(*C.char)(unsafe.Pointer(&pix[0])), C.int(stride),
 		(C.int)(width), (C.int)(height), (C.int)(channels), (C.int)(depth), C.int(quality),
 		(C.jxr_data_type_t)(data_type),
+		&size,
 	))
 	if rv != jxr_true {
 		err = fmt.Errorf("jxr_encode_len: failed")
