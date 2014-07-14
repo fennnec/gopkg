@@ -173,7 +173,7 @@ TEST(jxr, DecodeAndEncode) {
 		buf->clear();
 		buf->resize(src->size());
 		n = jxr_encode(
-			(char*)buf->data(), buf->size(), src->data(), 0,
+			(char*)buf->data(), buf->size(), src->data(), src->size(), 0,
 			width, height, channels, depth,
 			90, jxr_unsigned,
 			&newSize

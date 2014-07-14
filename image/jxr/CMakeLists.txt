@@ -67,6 +67,7 @@ set(JXR_SRC
   ./jxrlib/src/jxr_private.c
   ./jxrlib/src/jxr_decode.c
   ./jxrlib/src/jxr_encode.c
+  ./jxrlib/src/jxr_stream_discard
 )
 
 add_library(jxrlib SHARED

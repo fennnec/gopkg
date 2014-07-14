@@ -17,7 +17,7 @@ struct jxr_decoder_t {
 	jxr_data_type_t   dataType;
 };
 
-static const char* jxr_decoder_type = "jxr_decoder_t";
+static const char jxr_decoder_type[] = "jxr_decoder_t";
 
 jxr_decoder_t* jxr_decoder_new() {
 	jxr_decoder_t* p = (jxr_decoder_t*)calloc(1, sizeof(*p));

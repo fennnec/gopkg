@@ -51,14 +51,15 @@ jxr_bool_t jxr_decode(
 );
 
 jxr_bool_t jxr_encode_len(
-	const char* pix, int stride,
+	const char* data, int data_size, int stride,
 	int width, int height, int channels, int depth,
 	int quality, jxr_data_type_t type,
 	int* size
 );
 
 jxr_bool_t jxr_encode(
-	char* buf, int buf_len, const char* pix, int stride,
+	char* buf, int buf_len,
+	const char* data, int data_size, int stride,
 	int width, int height, int channels, int depth,
 	int quality, jxr_data_type_t type,
 	int* size
@@ -89,7 +90,7 @@ jxr_encoder_t* jxr_encoder_new();
 void jxr_encoder_delete(jxr_encoder_t* p);
 
 jxr_bool_t jxr_encoder_init(jxr_encoder_t* p,
-	const char* data, int stride,
+	const char* data, int size, int stride,
 	int width, int height, int channels, int depth,
 	int quality, jxr_data_type_t type
 );

@@ -89,7 +89,7 @@ func jxr_encode_len(
 		return
 	}
 	rv := jxr_bool_t(C.jxr_encode_len(
-		(*C.char)(unsafe.Pointer(&pix[0])), C.int(stride),
+		(*C.char)(unsafe.Pointer(&pix[0])), C.int(len(pix)), C.int(stride),
 		(C.int)(width), (C.int)(height), (C.int)(channels), (C.int)(depth), C.int(quality),
 		(C.jxr_data_type_t)(data_type),
 		&size,
@@ -112,7 +112,7 @@ func jxr_encode(
 	}
 	rv := jxr_bool_t(C.jxr_encode(
 		(*C.char)(unsafe.Pointer(&buf[0])), C.int(len(buf)),
-		(*C.char)(unsafe.Pointer(&pix[0])), C.int(stride),
+		(*C.char)(unsafe.Pointer(&pix[0])), C.int(len(pix)), C.int(stride),
 		C.int(width), C.int(height), C.int(channels), C.int(depth), C.int(quality),
 		C.jxr_data_type_t(data_type),
 		&newSize,

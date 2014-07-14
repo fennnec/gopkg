@@ -4,7 +4,6 @@
 
 #include "jxr_private.h"
 
-
 // fotmat info list
 static const struct {
 	const char* name;
@@ -146,5 +145,5 @@ jxr_bool_t jxr_golden_format(
 		return jxr_true;
 	}
 	return jxr_false;
-
 }
+

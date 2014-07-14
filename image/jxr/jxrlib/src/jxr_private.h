@@ -28,6 +28,10 @@ jxr_bool_t jxr_golden_format(
 	const PKPixelFormatGUID** fmt
 );
 
+ERR CreateWS_Discard(
+	struct WMPStream** ppWS
+);
+
 #ifdef  __cplusplus
 } // extern "C"
 #endif

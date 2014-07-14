@@ -73,7 +73,7 @@ jxr_bool_t jxr_decode(
 }
 
 jxr_bool_t jxr_encode_len(
-	const char* data, int stride,
+	const char* data, int data_size, int stride,
 	int width, int height, int channels, int depth,
 	int quality, jxr_data_type_t type,
 	int* size
@@ -82,7 +82,7 @@ jxr_bool_t jxr_encode_len(
 	if(!p) return jxr_false;
 
 	if(!jxr_encoder_init(
-		p, data, stride,
+		p, data, data_size, stride,
 		width, height, channels, depth,
 		quality, type
 	)) {
@@ -99,7 +99,8 @@ jxr_bool_t jxr_encode_len(
 }
 
 jxr_bool_t jxr_encode(
-	char* buf, int buf_len, const char* data, int stride,
+	char* buf, int buf_len,
+	const char* data, int data_size, int stride,
 	int width, int height, int channels, int depth,
 	int quality, jxr_data_type_t type,
 	int* size
@@ -110,7 +111,7 @@ jxr_bool_t jxr_encode(
 	if(!p) return jxr_false;
 
 	if(!jxr_encoder_init(
-		p, data, stride,
+		p, data, data_size, stride,
 		width, height, channels, depth,
 		quality, type
 	)) {
