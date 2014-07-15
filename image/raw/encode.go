@@ -71,7 +71,7 @@ func (p *Encoder) encodeGray(m image.Image, buf []byte) (data []byte, err error)
 	case *image.Gray16:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				d[off] = uint8(m.Gray16At(x, y).Y >> 8)
 				off++
 			}
@@ -85,7 +85,7 @@ func (p *Encoder) encodeGray(m image.Image, buf []byte) (data []byte, err error)
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				d[off] = color.GrayModel.Convert(m.At(x, y)).(color.Gray).Y
 				off++
 			}
@@ -102,7 +102,7 @@ func (p *Encoder) encodeGray16(m image.Image, buf []byte) (data []byte, err erro
 	case *image.Gray:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				builtin.PutUint16(d[off:], uint16(m.GrayAt(x, y).Y)<<8)
 				off += 2
 			}
@@ -119,7 +119,7 @@ func (p *Encoder) encodeGray16(m image.Image, buf []byte) (data []byte, err erro
 	case *image.YCbCr:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.YCbCrAt(x, y)
 				builtin.PutUint16(d[off:], uint16(v.Y)<<8)
 				off += 2
@@ -128,7 +128,7 @@ func (p *Encoder) encodeGray16(m image.Image, buf []byte) (data []byte, err erro
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.Gray16Model.Convert(m.At(x, y)).(color.Gray16)
 				builtin.PutUint16(d[off:], v.Y)
 				off += 2
@@ -146,7 +146,7 @@ func (p *Encoder) encodeGray32f(m image.Image, buf []byte) (data []byte, err err
 	case *image.Gray:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				builtin.PutFloat32(d[off:], float32(uint16(m.GrayAt(x, y).Y)<<8))
 				off += 4
 			}
@@ -169,6 +169,15 @@ func (p *Encoder) encodeGray32f(m image.Image, buf []byte) (data []byte, err err
 				off += 4
 			}
 		}
+	case *image_ext.RGB96f:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGB96fAt(x, y)
+				builtin.PutFloat32(d[off:], 0.2990*v.R+0.5870*v.G+0.1140*v.B)
+				off += 4
+			}
+		}
 	case *image_ext.RGBA128f:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
@@ -181,7 +190,7 @@ func (p *Encoder) encodeGray32f(m image.Image, buf []byte) (data []byte, err err
 	case *image.YCbCr:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.YCbCrAt(x, y)
 				builtin.PutFloat32(d[off:], float32(uint16(v.Y)<<8))
 				off += 4
@@ -190,7 +199,7 @@ func (p *Encoder) encodeGray32f(m image.Image, buf []byte) (data []byte, err err
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.Gray16Model.Convert(m.At(x, y)).(color.Gray16)
 				builtin.PutFloat32(d[off:], float32(v.Y))
 				off += 4
@@ -227,6 +236,12 @@ func (p *Encoder) encodeRGB(m image.Image, buf []byte) (data []byte, err error) 
 				off += 3
 			}
 		}
+	case *image_ext.RGB:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			copy(d[off:][:b.Dx()*3], m.Pix[y*m.Stride:])
+			off += b.Dx() * 3
+		}
 	case *image.RGBA:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
@@ -253,7 +268,7 @@ func (p *Encoder) encodeRGB(m image.Image, buf []byte) (data []byte, err error) 
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.RGBAModel.Convert(m.At(x, y)).(color.RGBA)
 				d[off+0] = v.R
 				d[off+1] = v.G
@@ -292,6 +307,17 @@ func (p *Encoder) encodeRGB48(m image.Image, buf []byte) (data []byte, err error
 				off += 6
 			}
 		}
+	case *image_ext.RGB:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGBAt(x, y)
+				builtin.PutUint16(d[off+0:], uint16(v.R)<<8)
+				builtin.PutUint16(d[off+2:], uint16(v.G)<<8)
+				builtin.PutUint16(d[off+4:], uint16(v.B)<<8)
+				off += 6
+			}
+		}
 	case *image.RGBA:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
@@ -300,6 +326,17 @@ func (p *Encoder) encodeRGB48(m image.Image, buf []byte) (data []byte, err error
 				builtin.PutUint16(d[off+0:], uint16(v.R)<<8)
 				builtin.PutUint16(d[off+2:], uint16(v.G)<<8)
 				builtin.PutUint16(d[off+4:], uint16(v.B)<<8)
+				off += 6
+			}
+		}
+	case *image_ext.RGB48:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGB48At(x, y)
+				builtin.PutUint16(d[off+0:], v.R)
+				builtin.PutUint16(d[off+2:], v.G)
+				builtin.PutUint16(d[off+4:], v.B)
 				off += 6
 			}
 		}
@@ -329,7 +366,7 @@ func (p *Encoder) encodeRGB48(m image.Image, buf []byte) (data []byte, err error
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.RGBA64Model.Convert(m.At(x, y)).(color.RGBA64)
 				builtin.PutUint16(d[off+0:], v.R)
 				builtin.PutUint16(d[off+2:], v.G)
@@ -379,6 +416,17 @@ func (p *Encoder) encodeRGB96f(m image.Image, buf []byte) (data []byte, err erro
 				off += 12
 			}
 		}
+	case *image_ext.RGB:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGBAt(x, y)
+				builtin.PutFloat32(d[off+0:], float32(uint16(v.R)<<8))
+				builtin.PutFloat32(d[off+4:], float32(uint16(v.G)<<8))
+				builtin.PutFloat32(d[off+8:], float32(uint16(v.B)<<8))
+				off += 12
+			}
+		}
 	case *image.RGBA:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
@@ -398,6 +446,17 @@ func (p *Encoder) encodeRGB96f(m image.Image, buf []byte) (data []byte, err erro
 				builtin.PutFloat32(d[off+0:], float32(v.R))
 				builtin.PutFloat32(d[off+4:], float32(v.G))
 				builtin.PutFloat32(d[off+8:], float32(v.B))
+				off += 12
+			}
+		}
+	case *image_ext.RGB96f:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGB96fAt(x, y)
+				builtin.PutFloat32(d[off+0:], v.R)
+				builtin.PutFloat32(d[off+4:], v.G)
+				builtin.PutFloat32(d[off+8:], v.B)
 				off += 12
 			}
 		}
@@ -427,7 +486,7 @@ func (p *Encoder) encodeRGB96f(m image.Image, buf []byte) (data []byte, err erro
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.RGBA64Model.Convert(m.At(x, y)).(color.RGBA64)
 				builtin.PutFloat32(d[off+0:], float32(v.R))
 				builtin.PutFloat32(d[off+4:], float32(v.G))
@@ -447,7 +506,7 @@ func (p *Encoder) encodeRGBA(m image.Image, buf []byte) (data []byte, err error)
 	case *image.Gray:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.GrayAt(x, y)
 				d[off+0] = v.Y
 				d[off+1] = v.Y
@@ -459,11 +518,23 @@ func (p *Encoder) encodeRGBA(m image.Image, buf []byte) (data []byte, err error)
 	case *image.Gray16:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.Gray16At(x, y)
 				d[off+0] = uint8(v.Y >> 8)
 				d[off+1] = uint8(v.Y >> 8)
 				d[off+2] = uint8(v.Y >> 8)
+				d[off+3] = 0xFF
+				off += 4
+			}
+		}
+	case *image_ext.RGB:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGBAt(x, y)
+				d[off+0] = uint8(v.R >> 8)
+				d[off+1] = uint8(v.G >> 8)
+				d[off+2] = uint8(v.B >> 8)
 				d[off+3] = 0xFF
 				off += 4
 			}
@@ -474,10 +545,22 @@ func (p *Encoder) encodeRGBA(m image.Image, buf []byte) (data []byte, err error)
 			copy(d[off:][:b.Dx()*4], m.Pix[y*m.Stride:])
 			off += b.Dx() * 4
 		}
+	case *image_ext.RGB48:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGB48At(x, y)
+				d[off+0] = uint8(v.R >> 8)
+				d[off+1] = uint8(v.G >> 8)
+				d[off+2] = uint8(v.B >> 8)
+				d[off+3] = 0xFF
+				off += 4
+			}
+		}
 	case *image.RGBA64:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.RGBA64At(x, y)
 				d[off+0] = uint8(v.R >> 8)
 				d[off+1] = uint8(v.G >> 8)
@@ -502,7 +585,7 @@ func (p *Encoder) encodeRGBA(m image.Image, buf []byte) (data []byte, err error)
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.RGBAModel.Convert(m.At(x, y)).(color.RGBA)
 				d[off+0] = v.R
 				d[off+1] = v.G
@@ -540,6 +623,30 @@ func (p *Encoder) encodeRGBA64(m image.Image, buf []byte) (data []byte, err erro
 				builtin.PutUint16(d[off+0:], v.Y)
 				builtin.PutUint16(d[off+2:], v.Y)
 				builtin.PutUint16(d[off+4:], v.Y)
+				builtin.PutUint16(d[off+6:], 0xFFFF)
+				off += 8
+			}
+		}
+	case *image_ext.RGB:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGBAt(x, y)
+				builtin.PutUint16(d[off+0:], uint16(v.R)<<8)
+				builtin.PutUint16(d[off+2:], uint16(v.G)<<8)
+				builtin.PutUint16(d[off+4:], uint16(v.B)<<8)
+				builtin.PutUint16(d[off+6:], 0xFFFF)
+				off += 8
+			}
+		}
+	case *image_ext.RGB48:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGB48At(x, y)
+				builtin.PutUint16(d[off+0:], v.R)
+				builtin.PutUint16(d[off+2:], v.G)
+				builtin.PutUint16(d[off+4:], v.B)
 				builtin.PutUint16(d[off+6:], 0xFFFF)
 				off += 8
 			}
@@ -584,7 +691,7 @@ func (p *Encoder) encodeRGBA64(m image.Image, buf []byte) (data []byte, err erro
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.RGBA64Model.Convert(m.At(x, y)).(color.RGBA64)
 				builtin.PutUint16(d[off+0:], v.R)
 				builtin.PutUint16(d[off+2:], v.G)
@@ -634,6 +741,42 @@ func (p *Encoder) encodeRGBA128f(m image.Image, buf []byte) (data []byte, err er
 				builtin.PutFloat32(d[off+0:], v.Y)
 				builtin.PutFloat32(d[off+4:], v.Y)
 				builtin.PutFloat32(d[off+8:], v.Y)
+				builtin.PutFloat32(d[off+12:], 0xFFFF)
+				off += 16
+			}
+		}
+	case *image_ext.RGB:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGBAt(x, y)
+				builtin.PutFloat32(d[off+0:], float32(uint16(v.R)<<8))
+				builtin.PutFloat32(d[off+4:], float32(uint16(v.G)<<8))
+				builtin.PutFloat32(d[off+8:], float32(uint16(v.B)<<8))
+				builtin.PutFloat32(d[off+12:], 0xFFFF)
+				off += 16
+			}
+		}
+	case *image_ext.RGB48:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGB48At(x, y)
+				builtin.PutFloat32(d[off+0:], float32(v.R))
+				builtin.PutFloat32(d[off+4:], float32(v.G))
+				builtin.PutFloat32(d[off+8:], float32(v.B))
+				builtin.PutFloat32(d[off+12:], 0xFFFF)
+				off += 16
+			}
+		}
+	case *image_ext.RGB96f:
+		var off = 0
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				v := m.RGB96fAt(x, y)
+				builtin.PutFloat32(d[off+0:], v.R)
+				builtin.PutFloat32(d[off+4:], v.G)
+				builtin.PutFloat32(d[off+8:], v.B)
 				builtin.PutFloat32(d[off+12:], 0xFFFF)
 				off += 16
 			}
@@ -690,7 +833,7 @@ func (p *Encoder) encodeRGBA128f(m image.Image, buf []byte) (data []byte, err er
 	default:
 		var off = 0
 		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; y < b.Max.X; x++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
 				v := color.RGBA64Model.Convert(m.At(x, y)).(color.RGBA64)
 				builtin.PutFloat32(d[off+0:], float32(v.R))
 				builtin.PutFloat32(d[off+4:], float32(v.G))

@@ -178,20 +178,19 @@ func (p *Decoder) decodeImageRGB(data image.Image, buf image_ext.ImageBuffer) (m
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
 	}
-	if m, ok := data.(*image.RGBA); ok {
+	if m, ok := data.(*image_ext.RGB); ok {
 		return m, nil
 	}
-	rgba := newRGBA(image.Rect(0, 0, p.Width, p.Height), buf)
+	rgb := newRGB(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
 				v := data.GrayAt(x, y)
-				rgba.SetRGBA(x, y, color.RGBA{
+				rgb.SetRGB(x, y, color_ext.RGB{
 					R: v.Y,
 					G: v.Y,
 					B: v.Y,
-					A: 0xFF,
 				})
 			}
 		}
@@ -199,22 +198,21 @@ func (p *Decoder) decodeImageRGB(data image.Image, buf image_ext.ImageBuffer) (m
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
 				v := data.Gray16At(x, y)
-				rgba.SetRGBA(x, y, color.RGBA{
+				rgb.SetRGB(x, y, color_ext.RGB{
 					R: uint8(v.Y >> 8),
 					G: uint8(v.Y >> 8),
 					B: uint8(v.Y >> 8),
-					A: 0xFF,
 				})
 			}
 		}
 	default:
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
-				rgba.Set(x, y, data.At(x, y))
+				rgb.Set(x, y, data.At(x, y))
 			}
 		}
 	}
-	m = rgba
+	m = rgb
 	return
 }
 
@@ -223,20 +221,19 @@ func (p *Decoder) decodeImageRGB48(data image.Image, buf image_ext.ImageBuffer) 
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
 	}
-	if m, ok := data.(*image.RGBA64); ok {
+	if m, ok := data.(*image_ext.RGB48); ok {
 		return m, nil
 	}
-	rgba64 := newRGBA64(image.Rect(0, 0, p.Width, p.Height), buf)
+	rgb48 := newRGB48(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
 				v := data.GrayAt(x, y)
-				rgba64.SetRGBA64(x, y, color.RGBA64{
+				rgb48.SetRGB48(x, y, color_ext.RGB48{
 					R: uint16(v.Y) >> 8,
 					G: uint16(v.Y) >> 8,
 					B: uint16(v.Y) >> 8,
-					A: 0xFFFF,
 				})
 			}
 		}
@@ -244,22 +241,21 @@ func (p *Decoder) decodeImageRGB48(data image.Image, buf image_ext.ImageBuffer) 
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
 				v := data.Gray16At(x, y)
-				rgba64.SetRGBA64(x, y, color.RGBA64{
+				rgb48.SetRGB48(x, y, color_ext.RGB48{
 					R: v.Y,
 					G: v.Y,
 					B: v.Y,
-					A: 0xFFFF,
 				})
 			}
 		}
 	default:
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
-				rgba64.Set(x, y, data.At(x, y))
+				rgb48.Set(x, y, data.At(x, y))
 			}
 		}
 	}
-	m = rgba64
+	m = rgb48
 	return
 }
 
@@ -268,20 +264,19 @@ func (p *Decoder) decodeImageRGB96f(data image.Image, buf image_ext.ImageBuffer)
 		err = fmt.Errorf("image/raw: bad bounds: %v", data.Bounds())
 		return
 	}
-	if m, ok := data.(*image_ext.RGBA128f); ok {
+	if m, ok := data.(*image_ext.RGB96f); ok {
 		return m, nil
 	}
-	rgba128f := newRGBA128f(image.Rect(0, 0, p.Width, p.Height), buf)
+	rgb96f := newRGB96f(image.Rect(0, 0, p.Width, p.Height), buf)
 	switch data := data.(type) {
 	case *image.Gray:
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
 				v := data.GrayAt(x, y)
-				rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+				rgb96f.SetRGB96f(x, y, color_ext.RGB96f{
 					R: float32(uint16(v.Y) >> 8),
 					G: float32(uint16(v.Y) >> 8),
 					B: float32(uint16(v.Y) >> 8),
-					A: 0xFFFF,
 				})
 			}
 		}
@@ -289,22 +284,21 @@ func (p *Decoder) decodeImageRGB96f(data image.Image, buf image_ext.ImageBuffer)
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
 				v := data.Gray16At(x, y)
-				rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+				rgb96f.SetRGB96f(x, y, color_ext.RGB96f{
 					R: float32(v.Y),
 					G: float32(v.Y),
 					B: float32(v.Y),
-					A: 0xFFFF,
 				})
 			}
 		}
 	default:
 		for y := 0; y < p.Height; y++ {
 			for x := 0; x < p.Width; x++ {
-				rgba128f.Set(x, y, data.At(x, y))
+				rgb96f.Set(x, y, data.At(x, y))
 			}
 		}
 	}
-	m = rgba128f
+	m = rgb96f
 	return
 }
 

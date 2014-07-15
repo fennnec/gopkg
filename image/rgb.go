@@ -27,6 +27,10 @@ func (p *RGB) ColorModel() color.Model { return color_ext.RGBModel }
 func (p *RGB) Bounds() image.Rectangle { return p.Rect }
 
 func (p *RGB) At(x, y int) color.Color {
+	return p.RGBAt(x, y)
+}
+
+func (p *RGB) RGBAt(x, y int) color_ext.RGB {
 	if !(image.Point{x, y}.In(p.Rect)) {
 		return color_ext.RGB{}
 	}

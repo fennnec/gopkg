@@ -45,20 +45,20 @@ var tTesterList = []tTester{
 	},
 	// RGB/RGB48/RGB96f
 	tTester{
-		Image:    image.NewRGBA(image.Rect(0, 0, 10, 10)),
-		Model:    color.RGBAModel,
+		Image:    image_ext.NewRGB(image.Rect(0, 0, 10, 10)),
+		Model:    color_ext.RGBModel,
 		DataType: reflect.Uint8,
 		Channels: 3,
 	},
 	tTester{
-		Image:    image.NewRGBA64(image.Rect(0, 0, 10, 10)),
-		Model:    color.RGBA64Model,
+		Image:    image_ext.NewRGB48(image.Rect(0, 0, 10, 10)),
+		Model:    color_ext.RGB48Model,
 		DataType: reflect.Uint16,
 		Channels: 3,
 	},
 	tTester{
-		Image:    image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		Model:    color_ext.RGBA128fModel,
+		Image:    image_ext.NewRGB96f(image.Rect(0, 0, 10, 10)),
+		Model:    color_ext.RGB96fModel,
 		DataType: reflect.Float32,
 		Channels: 3,
 	},
@@ -184,11 +184,11 @@ func TestEncodeAndDecode_YCbCr2RGB(t *testing.T) {
 	}
 
 	// check color
-	if m0.ColorModel() != color.RGBAModel {
-		t.Fatalf("want %v, got %v", color.RGBAModel, m0.ColorModel())
+	if m0.ColorModel() != color_ext.RGBModel {
+		t.Fatalf("want %v, got %v", color_ext.RGBModel, m0.ColorModel())
 	}
-	if m1.ColorModel() != color.RGBAModel {
-		t.Fatalf("want %v, got %v", color.RGBAModel, m1.ColorModel())
+	if m1.ColorModel() != color_ext.RGBModel {
+		t.Fatalf("want %v, got %v", color_ext.RGBModel, m1.ColorModel())
 	}
 
 	// check size
@@ -203,15 +203,14 @@ func TestEncodeAndDecode_YCbCr2RGB(t *testing.T) {
 	b := yuv.Bounds()
 	for y := b.Min.Y; y < b.Max.Y; y++ {
 		for x := b.Min.X; x < b.Max.X; x++ {
-			rgba := color.RGBAModel.Convert(yuv.At(x, y)).(color.RGBA)
-			c0 := m0.At(x, y).(color.RGBA)
-			c1 := m1.At(x, y).(color.RGBA)
-			rgba.A, c0.A, c1.A = 0, 0, 0
-			if c0 != rgba {
-				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgba, c0)
+			rgb := color_ext.RGBModel.Convert(yuv.At(x, y)).(color_ext.RGB)
+			c0 := m0.At(x, y).(color_ext.RGB)
+			c1 := m1.At(x, y).(color_ext.RGB)
+			if c0 != rgb {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgb, c0)
 			}
-			if c1 != rgba {
-				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgba, c1)
+			if c1 != rgb {
+				t.Fatalf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, rgb, c1)
 			}
 		}
 	}
@@ -288,6 +287,19 @@ func tCompareImage(img0 image.Image, channels int, model color.Model, img1 image
 			for x := b.Min.X; x < b.Max.X; x++ {
 				c0 := img0.Gray32fAt(x, y)
 				c1 := img1.Gray32fAt(x, y)
+				if c0 != c1 {
+					return fmt.Errorf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, c0, c1)
+				}
+			}
+		}
+	case color_ext.RGB96fModel:
+		b := img1.Bounds()
+		img0 := img0.(*image_ext.RGB96f)
+		img1 := img1.(*image_ext.RGB96f)
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				c0 := img0.RGB96fAt(x, y)
+				c1 := img1.RGB96fAt(x, y)
 				if c0 != c1 {
 					return fmt.Errorf("pixel at (%d, %d) has wrong color: want %v, got %v", x, y, c0, c1)
 				}

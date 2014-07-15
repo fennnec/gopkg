@@ -134,20 +134,19 @@ func (p *Decoder) decodeRGB(data []byte, buf image_ext.ImageBuffer) (m draw.Imag
 		err = fmt.Errorf("image/raw: decodeRGB, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
-	rgba := newRGBA(image.Rect(0, 0, p.Width, p.Height), buf)
+	rgb := newRGB(image.Rect(0, 0, p.Width, p.Height), buf)
 	var off = 0
 	for y := 0; y < p.Height; y++ {
 		for x := 0; x < p.Width; x++ {
-			rgba.SetRGBA(x, y, color.RGBA{
+			rgb.SetRGB(x, y, color_ext.RGB{
 				R: data[off+0],
 				G: data[off+1],
 				B: data[off+2],
-				A: 0xff,
 			})
 			off += 3
 		}
 	}
-	m = rgba
+	m = rgb
 	return
 }
 
@@ -156,21 +155,20 @@ func (p *Decoder) decodeRGB48(data []byte, buf image_ext.ImageBuffer) (m draw.Im
 		err = fmt.Errorf("image/raw: decodeRGB48, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
-	rgba64 := newRGBA64(image.Rect(0, 0, p.Width, p.Height), buf)
+	rgb48 := newRGB48(image.Rect(0, 0, p.Width, p.Height), buf)
 	var off = 0
 	for y := 0; y < p.Height; y++ {
 		u16Pix := builtin.Slice(data[off:], reflect.TypeOf([]uint16(nil))).([]uint16)
 		for x := 0; x < p.Width; x++ {
-			rgba64.SetRGBA64(x, y, color.RGBA64{
+			rgb48.SetRGB48(x, y, color_ext.RGB48{
 				R: u16Pix[x*3+0],
 				G: u16Pix[x*3+1],
 				B: u16Pix[x*3+2],
-				A: 0xffff,
 			})
 		}
 		off += p.Width * 6
 	}
-	m = rgba64
+	m = rgb48
 	return
 }
 
@@ -179,11 +177,11 @@ func (p *Decoder) decodeRGB96f(data []byte, buf image_ext.ImageBuffer) (m draw.I
 		err = fmt.Errorf("image/raw: decodeRGB96f, bad data size, expect = %d, got = %d", size, len(data))
 		return
 	}
-	rgba128f := newRGBA128f(image.Rect(0, 0, p.Width, p.Height), buf)
+	rgb96f := newRGB96f(image.Rect(0, 0, p.Width, p.Height), buf)
 	var off = 0
 	for y := 0; y < p.Height; y++ {
 		for x := 0; x < p.Width; x++ {
-			rgba128f.SetRGBA128f(x, y, color_ext.RGBA128f{
+			rgb96f.SetRGB96f(x, y, color_ext.RGB96f{
 				R: builtin.Float32(data[off+0:]),
 				G: builtin.Float32(data[off+4:]),
 				B: builtin.Float32(data[off+8:]),
@@ -191,7 +189,7 @@ func (p *Decoder) decodeRGB96f(data []byte, buf image_ext.ImageBuffer) (m draw.I
 			off += 12
 		}
 	}
-	m = rgba128f
+	m = rgb96f
 	return
 }
 

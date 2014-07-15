@@ -57,6 +57,33 @@ func newGray32f(r image.Rectangle, buf image_ext.ImageBuffer) *image_ext.Gray32f
 	return image_ext.NewGray32f(r)
 }
 
+func newRGB(r image.Rectangle, buf image_ext.ImageBuffer) *image_ext.RGB {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image_ext.RGB); ok {
+			return m
+		}
+	}
+	return image_ext.NewRGB(r)
+}
+
+func newRGB48(r image.Rectangle, buf image_ext.ImageBuffer) *image_ext.RGB48 {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image_ext.RGB48); ok {
+			return m
+		}
+	}
+	return image_ext.NewRGB48(r)
+}
+
+func newRGB96f(r image.Rectangle, buf image_ext.ImageBuffer) *image_ext.RGB96f {
+	if buf != nil && r.In(buf.Bounds()) {
+		if m, ok := buf.SubImage(r).(*image_ext.RGB96f); ok {
+			return m
+		}
+	}
+	return image_ext.NewRGB96f(r)
+}
+
 func newRGBA(r image.Rectangle, buf image_ext.ImageBuffer) *image.RGBA {
 	if buf != nil && r.In(buf.Bounds()) {
 		if m, ok := buf.SubImage(r).(*image.RGBA); ok {
