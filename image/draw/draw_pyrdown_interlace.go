@@ -59,6 +59,54 @@ func drawPyrDownGray32f_Interlace(dst *image_ext.Gray32f, r image.Rectangle, src
 	}
 }
 
+func drawPyrDownRGB_Interlace(dst *image_ext.RGB, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			for x := r.Min.X; x < r.Max.X; x++ {
+				x0 := (x-r.Min.X)*2 + sp.X
+				y0 := (y-r.Min.Y)*2 + sp.Y
+
+				dst.SetRGB(x, y, src.RGBAt(x0, y0))
+			}
+		}
+	default:
+		drawPyrDown_Interlace(dst, r, src, sp)
+	}
+}
+
+func drawPyrDownRGB48_Interlace(dst *image_ext.RGB48, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB48:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			for x := r.Min.X; x < r.Max.X; x++ {
+				x0 := (x-r.Min.X)*2 + sp.X
+				y0 := (y-r.Min.Y)*2 + sp.Y
+
+				dst.SetRGB48(x, y, src.RGB48At(x0, y0))
+			}
+		}
+	default:
+		drawPyrDown_Interlace(dst, r, src, sp)
+	}
+}
+
+func drawPyrDownRGB96f_Interlace(dst *image_ext.RGB96f, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB96f:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			for x := r.Min.X; x < r.Max.X; x++ {
+				x0 := (x-r.Min.X)*2 + sp.X
+				y0 := (y-r.Min.Y)*2 + sp.Y
+
+				dst.SetRGB96f(x, y, src.RGB96fAt(x0, y0))
+			}
+		}
+	default:
+		drawPyrDown_Interlace(dst, r, src, sp)
+	}
+}
+
 func drawPyrDownRGBA_Interlace(dst *image.RGBA, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.RGBA:

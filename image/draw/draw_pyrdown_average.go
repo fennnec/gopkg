@@ -143,6 +143,83 @@ func drawPyrDownGray32f_Average(dst *image_ext.Gray32f, r image.Rectangle, src i
 	}
 }
 
+func drawPyrDownRGB_Average(dst *image_ext.RGB, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			for x := r.Min.X; x < r.Max.X; x++ {
+				x0 := (x-r.Min.X)*2 + sp.X
+				y0 := (y-r.Min.Y)*2 + sp.Y
+
+				rgb00 := src.RGBAt(x0+0, y0+0)
+				rgb01 := src.RGBAt(x0+0, y0+1)
+				rgb11 := src.RGBAt(x0+1, y0+1)
+				rgb10 := src.RGBAt(x0+1, y0+0)
+
+				dst.SetRGB(x, y, color_ext.RGB{
+					R: uint8((uint16(rgb00.R) + uint16(rgb01.R) + uint16(rgb11.R) + uint16(rgb10.R)) / 4),
+					G: uint8((uint16(rgb00.G) + uint16(rgb01.G) + uint16(rgb11.G) + uint16(rgb10.G)) / 4),
+					B: uint8((uint16(rgb00.B) + uint16(rgb01.B) + uint16(rgb11.B) + uint16(rgb10.B)) / 4),
+				})
+			}
+		}
+		return
+	default:
+		drawPyrDown_Average(dst, r, src, sp)
+		return
+	}
+}
+
+func drawPyrDownRGB48_Average(dst *image_ext.RGB48, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB48:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			for x := r.Min.X; x < r.Max.X; x++ {
+				x0 := (x-r.Min.X)*2 + sp.X
+				y0 := (y-r.Min.Y)*2 + sp.Y
+
+				rgb00 := src.RGB48At(x0+0, y0+0)
+				rgb01 := src.RGB48At(x0+0, y0+1)
+				rgb11 := src.RGB48At(x0+1, y0+1)
+				rgb10 := src.RGB48At(x0+1, y0+0)
+
+				dst.SetRGB48(x, y, color_ext.RGB48{
+					R: uint16((uint32(rgb00.R) + uint32(rgb01.R) + uint32(rgb11.R) + uint32(rgb10.R)) / 4),
+					G: uint16((uint32(rgb00.G) + uint32(rgb01.G) + uint32(rgb11.G) + uint32(rgb10.G)) / 4),
+					B: uint16((uint32(rgb00.B) + uint32(rgb01.B) + uint32(rgb11.B) + uint32(rgb10.B)) / 4),
+				})
+			}
+		}
+	default:
+		drawPyrDown_Average(dst, r, src, sp)
+	}
+}
+
+func drawPyrDownRGB96f_Average(dst *image_ext.RGB96f, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB96f:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			for x := r.Min.X; x < r.Max.X; x++ {
+				x0 := (x-r.Min.X)*2 + sp.X
+				y0 := (y-r.Min.Y)*2 + sp.Y
+
+				rgb00 := src.RGB96fAt(x0+0, y0+0)
+				rgb01 := src.RGB96fAt(x0+0, y0+1)
+				rgb11 := src.RGB96fAt(x0+1, y0+1)
+				rgb10 := src.RGB96fAt(x0+1, y0+0)
+
+				dst.SetRGB96f(x, y, color_ext.RGB96f{
+					R: (rgb00.R + rgb01.R + rgb11.R + rgb10.R) / 4,
+					G: (rgb00.G + rgb01.G + rgb11.G + rgb10.G) / 4,
+					B: (rgb00.B + rgb01.B + rgb11.B + rgb10.B) / 4,
+				})
+			}
+		}
+	default:
+		drawPyrDown_Average(dst, r, src, sp)
+	}
+}
+
 func drawPyrDownRGBA_Average(dst *image.RGBA, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image.RGBA:
@@ -227,6 +304,7 @@ func drawPyrDownRGBA64_Average(dst *image.RGBA64, r image.Rectangle, src image.I
 		drawPyrDown_Average(dst, r, src, sp)
 	}
 }
+
 func drawPyrDownRGBA128f_Average(dst *image_ext.RGBA128f, r image.Rectangle, src image.Image, sp image.Point) {
 	switch src := src.(type) {
 	case *image_ext.RGBA128f:

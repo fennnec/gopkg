@@ -25,14 +25,18 @@ func Draw(dst draw.Image, r image.Rectangle, src image.Image, sp image.Point) {
 		drawGray16(dst, r, src, sp)
 	case *image_ext.Gray32f:
 		drawGray32f(dst, r, src, sp)
+	case *image_ext.RGB:
+		drawRGB(dst, r, src, sp)
+	case *image_ext.RGB48:
+		drawRGB48(dst, r, src, sp)
+	case *image_ext.RGB96f:
+		drawRGB96f(dst, r, src, sp)
 	case *image.RGBA:
 		drawRGBA(dst, r, src, sp)
 	case *image.RGBA64:
 		drawRGBA64(dst, r, src, sp)
 	case *image_ext.RGBA128f:
 		drawRGBA128f(dst, r, src, sp)
-	//case *image.YCbCr:
-	//	drawYCbCr(&yCbCr{dst}, r, src, sp)
 	default:
 		drawImage(dst, r, src, sp)
 	}
@@ -71,6 +75,45 @@ func drawGray32f(dst *image_ext.Gray32f, r image.Rectangle, src image.Image, sp 
 			off0 := dst.PixOffset(r.Min.X, y)
 			off1 := src.PixOffset(sp.X, y-r.Min.Y+sp.Y)
 			copy(dst.Pix[off0:][:r.Dx()*4], src.Pix[off1:])
+		}
+	default:
+		drawImage(dst, r, src, sp)
+	}
+}
+
+func drawRGB(dst *image_ext.RGB, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			off0 := dst.PixOffset(r.Min.X, y)
+			off1 := src.PixOffset(sp.X, y-r.Min.Y+sp.Y)
+			copy(dst.Pix[off0:][:r.Dx()*3], src.Pix[off1:])
+		}
+	default:
+		drawImage(dst, r, src, sp)
+	}
+}
+
+func drawRGB48(dst *image_ext.RGB48, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB48:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			off0 := dst.PixOffset(r.Min.X, y)
+			off1 := src.PixOffset(sp.X, y-r.Min.Y+sp.Y)
+			copy(dst.Pix[off0:][:r.Dx()*6], src.Pix[off1:])
+		}
+	default:
+		drawImage(dst, r, src, sp)
+	}
+}
+
+func drawRGB96f(dst *image_ext.RGB96f, r image.Rectangle, src image.Image, sp image.Point) {
+	switch src := src.(type) {
+	case *image_ext.RGB96f:
+		for y := r.Min.Y; y < r.Max.Y; y++ {
+			off0 := dst.PixOffset(r.Min.X, y)
+			off1 := src.PixOffset(sp.X, y-r.Min.Y+sp.Y)
+			copy(dst.Pix[off0:][:r.Dx()*12], src.Pix[off1:])
 		}
 	default:
 		drawImage(dst, r, src, sp)
