@@ -38,7 +38,7 @@ func TestCache(t *testing.T) {
 	// empty & lookup fail
 	for _, p := range pairs {
 		if v := cache.Lookup([]byte(p.key)); v != nil {
-			t.Fatal("%s: expect = nil, got = not nil\n", p.key)
+			t.Fatalf("%s: expect = nil, got = not nil\n", p.key)
 		}
 	}
 
@@ -49,7 +49,7 @@ func TestCache(t *testing.T) {
 	for _, p := range pairs {
 		v := cache.Lookup([]byte(p.key))
 		if v == nil {
-			t.Fatal("%s: expect = not nil, got = nil\n", p.key)
+			t.Fatalf("%s: expect = not nil, got = nil\n", p.key)
 		}
 		if !bytes.Equal([]byte(p.value), v.Slice()) {
 			t.Fatalf("%s: expect = %v, got = %v\n", p.key, p.value, string(v.Slice()))
@@ -63,7 +63,7 @@ func TestCache(t *testing.T) {
 	}
 	for _, p := range pairs {
 		if v := cache.Lookup([]byte(p.key)); v != nil {
-			t.Fatal("%s: expect = nil, got = not nil\n", p.key)
+			t.Fatalf("%s: expect = nil, got = not nil\n", p.key)
 		}
 	}
 }

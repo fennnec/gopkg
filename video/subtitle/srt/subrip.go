@@ -42,7 +42,6 @@ func ParseData(data []byte) (subtitles []Subtitle, err error) {
 		}
 		subtitles = append(subtitles, sub)
 	}
-	return
 }
 
 func readSubtitle(r *lineReader) (sub Subtitle, err error) {
@@ -129,5 +128,4 @@ func (p *Subtitle) readTexts(r *lineReader) (err error) {
 		}
 		p.Texts = append(p.Texts, s)
 	}
-	return nil
 }

@@ -35,7 +35,7 @@ func (p *RGB) RGBAt(x, y int) color_ext.RGB {
 		return color_ext.RGB{}
 	}
 	i := p.PixOffset(x, y)
-	return color_ext.RGB{p.Pix[i+0], p.Pix[i+1], p.Pix[i+2]}
+	return color_ext.RGB{R: p.Pix[i+0], G: p.Pix[i+1], B: p.Pix[i+2]}
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to

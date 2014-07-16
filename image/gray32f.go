@@ -36,7 +36,7 @@ func (p *Gray32f) Gray32fAt(x, y int) color_ext.Gray32f {
 		return color_ext.Gray32f{}
 	}
 	v := builtin.Float32(p.Pix[p.PixOffset(x, y):])
-	return color_ext.Gray32f{v}
+	return color_ext.Gray32f{Y: v}
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to

@@ -159,45 +159,45 @@ var tDrawTesterList = []tDrawTester{
 	// Gray32f
 	tDrawTester{
 		BgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.Gray32f{100 << 8},
+		BgdColor: color_ext.Gray32f{Y: 100 << 8},
 		FgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.Gray32f{250 << 8},
+		FgdColor: color_ext.Gray32f{Y: 250 << 8},
 		DrawRect: image.Rect(0, 0, 5, 5),
 		DrawSp:   image.Pt(0, 0),
 		FgdRect:  image.Rect(0, 0, 5, 5),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.Gray32f{100 << 8},
+		BgdColor: color_ext.Gray32f{Y: 100 << 8},
 		FgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.Gray32f{250 << 8},
+		FgdColor: color_ext.Gray32f{Y: 250 << 8},
 		DrawRect: image.Rect(0, 0, 10, 10),
 		DrawSp:   image.Pt(0, 0),
 		FgdRect:  image.Rect(0, 0, 10, 10),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.Gray32f{100 << 8},
+		BgdColor: color_ext.Gray32f{Y: 100 << 8},
 		FgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.Gray32f{250 << 8},
+		FgdColor: color_ext.Gray32f{Y: 250 << 8},
 		DrawRect: image.Rect(0, 0, 15, 15), // +overflow
 		DrawSp:   image.Pt(0, 0),
 		FgdRect:  image.Rect(0, 0, 10, 10),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.Gray32f{100 << 8},
+		BgdColor: color_ext.Gray32f{Y: 100 << 8},
 		FgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.Gray32f{250 << 8},
+		FgdColor: color_ext.Gray32f{Y: 250 << 8},
 		DrawRect: image.Rect(0, 0, 15, 15), // +overflow
 		DrawSp:   image.Pt(5, 5),           // +overflow
 		FgdRect:  image.Rect(0, 0, 5, 5),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.Gray32f{100 << 8},
+		BgdColor: color_ext.Gray32f{Y: 100 << 8},
 		FgdImage: image_ext.NewGray32f(image.Rect(0, 0, 8, 8)),
-		FgdColor: color_ext.Gray32f{250 << 8},
+		FgdColor: color_ext.Gray32f{Y: 250 << 8},
 		DrawRect: image.Rect(0, 0, 15, 15), // +overflow
 		DrawSp:   image.Pt(5, 5),           // +overflow
 		FgdRect:  image.Rect(0, 0, 3, 3),
@@ -300,45 +300,45 @@ var tDrawTesterList = []tDrawTester{
 	// RGBA128f
 	tDrawTester{
 		BgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.RGBA128f{100 << 8, 101 << 8, 102 << 8, 103 << 8},
+		BgdColor: color_ext.RGBA128f{R: 100 << 8, G: 101 << 8, B: 102 << 8, A: 103 << 8},
 		FgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.RGBA128f{250 << 8, 251 << 8, 252 << 8, 253 << 8},
+		FgdColor: color_ext.RGBA128f{R: 250 << 8, G: 251 << 8, B: 252 << 8, A: 253 << 8},
 		DrawRect: image.Rect(0, 0, 5, 5),
 		DrawSp:   image.Pt(0, 0),
 		FgdRect:  image.Rect(0, 0, 5, 5),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.RGBA128f{100 << 8, 101 << 8, 102 << 8, 103 << 8},
+		BgdColor: color_ext.RGBA128f{R: 100 << 8, G: 101 << 8, B: 102 << 8, A: 103 << 8},
 		FgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.RGBA128f{250 << 8, 251 << 8, 252 << 8, 253 << 8},
+		FgdColor: color_ext.RGBA128f{R: 250 << 8, G: 251 << 8, B: 252 << 8, A: 253 << 8},
 		DrawRect: image.Rect(0, 0, 10, 10),
 		DrawSp:   image.Pt(0, 0),
 		FgdRect:  image.Rect(0, 0, 10, 10),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.RGBA128f{100 << 8, 101 << 8, 102 << 8, 103 << 8},
+		BgdColor: color_ext.RGBA128f{R: 100 << 8, G: 101 << 8, B: 102 << 8, A: 103 << 8},
 		FgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.RGBA128f{250 << 8, 251 << 8, 252 << 8, 253 << 8},
+		FgdColor: color_ext.RGBA128f{R: 250 << 8, G: 251 << 8, B: 252 << 8, A: 253 << 8},
 		DrawRect: image.Rect(0, 0, 15, 15), // +overflow
 		DrawSp:   image.Pt(0, 0),
 		FgdRect:  image.Rect(0, 0, 10, 10),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.RGBA128f{100 << 8, 101 << 8, 102 << 8, 103 << 8},
+		BgdColor: color_ext.RGBA128f{R: 100 << 8, G: 101 << 8, B: 102 << 8, A: 103 << 8},
 		FgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		FgdColor: color_ext.RGBA128f{250 << 8, 251 << 8, 252 << 8, 253 << 8},
+		FgdColor: color_ext.RGBA128f{R: 250 << 8, G: 251 << 8, B: 252 << 8, A: 253 << 8},
 		DrawRect: image.Rect(0, 0, 15, 15), // +overflow
 		DrawSp:   image.Pt(5, 5),           // +overflow
 		FgdRect:  image.Rect(0, 0, 5, 5),
 	},
 	tDrawTester{
 		BgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
-		BgdColor: color_ext.RGBA128f{100 << 8, 101 << 8, 102 << 8, 103 << 8},
+		BgdColor: color_ext.RGBA128f{R: 100 << 8, G: 101 << 8, B: 102 << 8, A: 103 << 8},
 		FgdImage: image_ext.NewRGBA128f(image.Rect(0, 0, 8, 8)),
-		FgdColor: color_ext.RGBA128f{250 << 8, 251 << 8, 252 << 8, 253 << 8},
+		FgdColor: color_ext.RGBA128f{R: 250 << 8, G: 251 << 8, B: 252 << 8, A: 253 << 8},
 		DrawRect: image.Rect(0, 0, 15, 15), // +overflow
 		DrawSp:   image.Pt(5, 5),           // +overflow
 		FgdRect:  image.Rect(0, 0, 3, 3),

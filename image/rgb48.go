@@ -36,9 +36,9 @@ func (p *RGB48) RGB48At(x, y int) color_ext.RGB48 {
 	}
 	i := p.PixOffset(x, y)
 	return color_ext.RGB48{
-		uint16(p.Pix[i+0])<<8 | uint16(p.Pix[i+1]),
-		uint16(p.Pix[i+2])<<8 | uint16(p.Pix[i+3]),
-		uint16(p.Pix[i+4])<<8 | uint16(p.Pix[i+5]),
+		R: uint16(p.Pix[i+0])<<8 | uint16(p.Pix[i+1]),
+		G: uint16(p.Pix[i+2])<<8 | uint16(p.Pix[i+3]),
+		B: uint16(p.Pix[i+4])<<8 | uint16(p.Pix[i+5]),
 	}
 }
 

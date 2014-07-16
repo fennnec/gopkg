@@ -261,7 +261,6 @@ func GDALScaledProgress(dfComplete float64, pszMessage string, pData interface{}
 
 func GDALCreateScaledProgress(dfMin, dfMax float64, pfnProgress GDALProgressFunc, pData unsafe.Pointer) unsafe.Pointer {
 	panic("not impl")
-	return nil
 }
 
 func GDALDestroyScaledProgress(pData unsafe.Pointer) {

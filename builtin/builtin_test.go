@@ -14,7 +14,7 @@ func TestIf(t *testing.T) {
 	a, b := 2, 3
 	max := If(a > b, a, b).(int)
 	if max != 3 {
-		t.Fatal("expect = %v, got = %v", 3, max)
+		t.Fatalf("expect = %v, got = %v", 3, max)
 	}
 }
 
@@ -89,7 +89,7 @@ func TestSlice_notAlign(t *testing.T) {
 
 	for i := 0; i < len(src) && i < len(dst); i++ {
 		if src[i] != dst[i] {
-			t.Fatal("not equal, src[%d] = %x, dst[%d] = %x", i, src[i], i, dst[i])
+			t.Fatalf("not equal, src[%d] = %x, dst[%d] = %x", i, src[i], i, dst[i])
 		}
 	}
 }
