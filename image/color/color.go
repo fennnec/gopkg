@@ -84,12 +84,20 @@ var (
 )
 
 func gray32fModel(c color.Color) color.Color {
-	if _, ok := c.(Gray32f); ok {
+	switch c := c.(type) {
+	case Gray32f:
 		return c
+	case RGB96f:
+		y := (299*c.R + 587*c.G + 114*c.B + 500) / 1000
+		return Gray32f{float32(y)}
+	case RGBA128f:
+		y := (299*c.R + 587*c.G + 114*c.B + 500) / 1000
+		return Gray32f{float32(y)}
+	default:
+		r, g, b, _ := c.RGBA()
+		y := (299*r + 587*g + 114*b + 500) / 1000
+		return Gray32f{float32(y)}
 	}
-	r, g, b, _ := c.RGBA()
-	y := (299*r + 587*g + 114*b + 500) / 1000
-	return Gray32f{float32(y)}
 }
 
 func rgbModel(c color.Color) color.Color {
@@ -109,17 +117,29 @@ func rgb48Model(c color.Color) color.Color {
 }
 
 func rgb96fModel(c color.Color) color.Color {
-	if _, ok := c.(RGB96f); ok {
+	switch c := c.(type) {
+	case Gray32f:
+		return RGB96f{c.Y, c.Y, c.Y}
+	case RGB96f:
 		return c
+	case RGBA128f:
+		return RGB96f{c.R, c.G, c.B}
+	default:
+		r, g, b, _ := c.RGBA()
+		return RGB96f{float32(r), float32(g), float32(b)}
 	}
-	r, g, b, _ := c.RGBA()
-	return RGB96f{float32(r), float32(g), float32(b)}
 }
 
 func rgba128fModel(c color.Color) color.Color {
-	if _, ok := c.(RGBA128f); ok {
+	switch c := c.(type) {
+	case Gray32f:
+		return RGBA128f{c.Y, c.Y, c.Y, 0xFFFF}
+	case RGB96f:
+		return RGBA128f{c.R, c.G, c.B, 0xFFFF}
+	case RGBA128f:
 		return c
+	default:
+		r, g, b, a := c.RGBA()
+		return RGBA128f{float32(r), float32(g), float32(b), float32(a)}
 	}
-	r, g, b, a := c.RGBA()
-	return RGBA128f{float32(r), float32(g), float32(b), float32(a)}
 }
