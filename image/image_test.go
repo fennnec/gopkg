@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package image
+package image_test
 
 import (
 	"image"
 	"image/color"
 	"testing"
 
+	image_ext "github.com/chai2010/gopkg/image"
 	color_ext "github.com/chai2010/gopkg/image/color"
 )
 
@@ -27,11 +28,11 @@ func cmp(t *testing.T, cm color.Model, c0, c1 color.Color) bool {
 
 func TestImage(t *testing.T) {
 	testImage := []tImage{
-		NewGray32f(image.Rect(0, 0, 10, 10)),
-		NewRGB(image.Rect(0, 0, 10, 10)),
-		NewRGB48(image.Rect(0, 0, 10, 10)),
-		NewRGB96f(image.Rect(0, 0, 10, 10)),
-		NewRGBA128f(image.Rect(0, 0, 10, 10)),
+		image_ext.NewGray32f(image.Rect(0, 0, 10, 10)),
+		image_ext.NewRGB(image.Rect(0, 0, 10, 10)),
+		image_ext.NewRGB48(image.Rect(0, 0, 10, 10)),
+		image_ext.NewRGB96f(image.Rect(0, 0, 10, 10)),
+		image_ext.NewRGBA128f(image.Rect(0, 0, 10, 10)),
 	}
 	for _, m := range testImage {
 		if !image.Rect(0, 0, 10, 10).Eq(m.Bounds()) {
@@ -90,7 +91,7 @@ func Test16BitsPerColorChannel(t *testing.T) {
 		}
 	}
 	testImage := []tImage{
-		NewRGB48(image.Rect(0, 0, 10, 10)),
+		image_ext.NewRGB48(image.Rect(0, 0, 10, 10)),
 	}
 	for _, m := range testImage {
 		m.Set(1, 2, color.NRGBA64{0xffff, 0xffff, 0xffff, 0x1357}) // Non-premultiplied alpha.

@@ -55,9 +55,9 @@ func TestDecode(t *testing.T) {
 	}
 
 	// Compare the average delta to the tolerance level.
-	want := int64(5 << 8)
+	want := int64(2 << 8)
 	if got := averageDelta(img0, img1); got > want {
-		t.Errorf("average delta too high; got %d, want <= %d", got, want)
+		t.Fatalf("average delta too high; got %d, want <= %d", got, want)
 	}
 }
 

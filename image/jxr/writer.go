@@ -12,5 +12,5 @@ import (
 
 // Encode writes the image m to w in JPEG/XR format.
 func Encode(w io.Writer, m image.Image) error {
-	return errors.New("jxr: unsupported JPEG/XR image")
+	return errors.New("jxr: Encode, unsupported")
 }

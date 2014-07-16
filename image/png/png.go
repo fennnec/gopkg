@@ -42,7 +42,7 @@ func encode(w io.Writer, m image.Image, opt interface{}) error {
 
 func init() {
 	image_ext.RegisterFormat(
-		"png", "BM????\x00\x00\x00\x00",
+		"png", pngHeader,
 		Decode, DecodeConfig,
 		encode,
 	)
