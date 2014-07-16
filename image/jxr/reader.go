@@ -170,7 +170,33 @@ func Decode(r io.Reader) (m image.Image, err error) {
 	return
 }
 
+func encode(w io.Writer, m image.Image, opt interface{}) error {
+	return Encode(w, m)
+}
+
 func init() {
 	image.RegisterFormat("jxr", "II\xBC\x00", Decode, DecodeConfig)
 	image.RegisterFormat("jxr", "II\xBC\x01", Decode, DecodeConfig)
+
+	image_ext.RegisterFormat(
+		"jxr", "II\xBC\x00",
+		Decode, DecodeConfig,
+		encode,
+	)
+	image_ext.RegisterFormat(
+		"jxr", "II\xBC\x01",
+		Decode, DecodeConfig,
+		encode,
+	)
+
+	image_ext.RegisterFormat(
+		"wdp", "II\xBC\x00",
+		Decode, DecodeConfig,
+		encode,
+	)
+	image_ext.RegisterFormat(
+		"wdp", "II\xBC\x01",
+		Decode, DecodeConfig,
+		encode,
+	)
 }
