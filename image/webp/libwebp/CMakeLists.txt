@@ -125,22 +125,30 @@ set(WEBP_SRC
   ./src/webp_api.c
   ./include/webp.h
 
-  #./src/webp_dec.c
-  #./src/webp_demux.c
-  #./src/webp_dsp_dec.c
-  #./src/webp_dsp_enc.c
-  #./src/webp_enc.c
-  #./src/webp_mux.c
-  #./src/webp_utils_dec.c
-  #./src/webp_utils_enc.c
-  ${WEBP_DEC_SRC}
-  ${WEBP_DEMUX_SRC}
-  ${WEBP_DSP_DEC_SRC}
-  ${WEBP_DSP_ENC_SRC}
-  ${WEBP_ENC_SRC}
-  ${WEBP_MUX_SRC}
-  ${WEBP_UTILS_DEC_SRC}
-  ${WEBP_UTILS_ENC_SRC}
+  ./src/webp_dec.c
+  ./src/webp_demux.c
+  ./src/webp_dsp_dec.c
+  ./src/webp_dsp_enc.c
+  ./src/webp_enc.c
+  ./src/webp_mux.c
+  ./src/webp_utils_dec.c
+  ./src/webp_utils_enc.c
+
+  ./src/enc/alpha.c
+  ./src/enc/picture.c
+  ./src/enc/analysis.c
+  ./src/enc/quant.c
+  ./src/enc/frame.c
+  ./src/enc/webpenc.c
+
+  #${WEBP_DEC_SRC}
+  #${WEBP_DEMUX_SRC}
+  #${WEBP_DSP_DEC_SRC}
+  #${WEBP_DSP_ENC_SRC}
+  #${WEBP_ENC_SRC}
+  #${WEBP_MUX_SRC}
+  #${WEBP_UTILS_DEC_SRC}
+  #${WEBP_UTILS_ENC_SRC}
 )
 
 #------------------------------------------------------------------------------
