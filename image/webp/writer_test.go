@@ -13,54 +13,66 @@ import (
 	_ "github.com/chai2010/gopkg/image/png"
 )
 
-// 做成列表测试
-// 知道压缩的参数
-
-func TestEncode(t *testing.T) {
-	img0, _, err := image_ext.Load(testdataDir + "video-001.png")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	buf := new(bytes.Buffer)
-	err = Encode(buf, img0, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	img1, err := Decode(buf)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Compare the average delta to the tolerance level.
-	want := int64(12 << 8)
-	if got := averageDelta(img0, img1); got > want {
-		t.Fatalf("average delta too high; got %d, want <= %d", got, want)
-	}
+type tTester struct {
+	Filename string
+	Lossless bool
+	Quality  float32 // 0 ~ 100
+	MaxDelta int64
 }
 
-func TestEncodeLossless(t *testing.T) {
-	img0, _, err := image_ext.Load(testdataDir + "video-001.png")
-	if err != nil {
-		t.Fatal(err)
-	}
+var tTesterList = []tTester{
+	tTester{
+		Filename: "video-001.png",
+		Lossless: false,
+		Quality:  90,
+		MaxDelta: 5,
+	},
+	tTester{
+		Filename: "video-001.png",
+		Lossless: true,
+		Quality:  90,
+		MaxDelta: 0,
+	},
+	tTester{
+		Filename: "video-005.gray.png",
+		Lossless: false,
+		Quality:  90,
+		MaxDelta: 5,
+	},
+	tTester{
+		Filename: "video-005.gray.png",
+		Lossless: true,
+		Quality:  90,
+		MaxDelta: 0,
+	},
+}
 
-	buf := new(bytes.Buffer)
-	err = Encode(buf, img0, &Options{Lossless: true})
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestEncode(t *testing.T) {
+	for i, v := range tTesterList {
+		img0, _, err := image_ext.Load(testdataDir + v.Filename)
+		if err != nil {
+			t.Fatalf("%d: %v", i, err)
+		}
 
-	img1, err := Decode(buf)
-	if err != nil {
-		t.Fatal(err)
-	}
+		buf := new(bytes.Buffer)
+		err = Encode(buf, img0, &Options{
+			Lossless: v.Lossless,
+			Quality:  v.Quality,
+		})
+		if err != nil {
+			t.Fatalf("%d: %v", i, err)
+		}
 
-	// Compare the average delta to the tolerance level.
-	want := int64(0)
-	if got := averageDelta(img0, img1); got > want {
-		t.Fatalf("average delta too high; got %d, want <= %d", got, want)
+		img1, err := Decode(buf)
+		if err != nil {
+			t.Fatalf("%d: %v", i, err)
+		}
+
+		// Compare the average delta to the tolerance level.
+		want := int64(v.MaxDelta << 8)
+		if got := averageDelta(img0, img1); got > want {
+			t.Fatalf("%d: average delta too high; got %d, want <= %d", i, got, want)
+		}
 	}
 }
 
