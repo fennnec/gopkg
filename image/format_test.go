@@ -66,7 +66,7 @@ var tFormatTesterList = []tFormatTester{
 		FileName:      "video-001.webp",
 		Format:        "webp",
 		DecodeEnabled: true,
-		EncodeEnabled: false, // ingore, unsupport
+		EncodeEnabled: true,
 	},
 }
 
