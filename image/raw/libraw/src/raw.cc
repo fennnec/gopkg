@@ -9,14 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-static bool rawIsValidDataType(uint8_t data_type) {
-	if(data_type == kRawDataType_UInt) return true;
-	if(data_type == kRawDataType_Int) return true;
-	if(data_type == kRawDataType_Float) return true;
+static bool rawpIsValidDataType(uint8_t data_type) {
+	if(data_type == kRawPDataType_UInt) return true;
+	if(data_type == kRawPDataType_Int) return true;
+	if(data_type == kRawPDataType_Float) return true;
 	return false;
 }
 
-static bool rawIsValidDepth(uint8_t depth) {
+static bool rawpIsValidDepth(uint8_t depth) {
 	if(depth == 8) return true;
 	if(depth == 16) return true;
 	if(depth == 32) return true;
@@ -24,11 +24,11 @@ static bool rawIsValidDepth(uint8_t depth) {
 	return false;
 }
 
-int rawGetHeader(
-	const uint8_t* data, size_t data_size,
-	RawHeader* hdr
+int rawpDecodeHeader(
+	const uint8_t* data, int data_size,
+	RawPHeader* hdr
 ) {
-	if(data == NULL || data_size < kRawHeaderSize || hdr == NULL) {
+	if(data == NULL || data_size < kRawPHeaderSize || hdr == NULL) {
 		return 0;
 	}
 	memset(hdr, 0, sizeof(*hdr));
@@ -56,7 +56,11 @@ int rawGetHeader(
 	hdr->Data = (uint8_t*)p;
 
 	// check header
-	if(hdr->Sig != kRawMagic) {
+	if(hdr->Sig[0] != 'R' || hdr->Sig[1] != 'a' || hdr->Sig[2] != 'w' || hdr->Sig[3] != 'P') {
+		memset(hdr, 0, sizeof(*hdr));
+		return 0;
+	}
+	if(hdr->Magic != kRawPMagic) {
 		memset(hdr, 0, sizeof(*hdr));
 		return 0;
 	}
@@ -68,11 +72,11 @@ int rawGetHeader(
 		memset(hdr, 0, sizeof(*hdr));
 		return 0;
 	}
-	if(!rawIsValidDataType(hdr->DataType)) {
+	if(!rawpIsValidDataType(hdr->DataType)) {
 		memset(hdr, 0, sizeof(*hdr));
 		return 0;
 	}
-	if(!rawIsValidDepth(hdr->Depth)) {
+	if(!rawpIsValidDepth(hdr->Depth)) {
 		memset(hdr, 0, sizeof(*hdr));
 		return 0;
 	}
@@ -95,7 +99,7 @@ int rawGetHeader(
 
 	// check type more ...
 	if(hdr->Depth == 8 || hdr->Depth == 16) {
-		if(hdr->DataType == kRawDataType_Float) {
+		if(hdr->DataType == kRawPDataType_Float) {
 			memset(hdr, 0, sizeof(*hdr));
 			return 0;
 		}
@@ -126,103 +130,99 @@ int rawGetHeader(
 	return 1;
 }
 
-uint8_t* rawDecode(
-	const uint8_t* data, size_t data_size,
-	int* width, int* height, int* channels, int* depth, int* data_type
+int rawpDecode(
+	const uint8_t* data, int data_size,
+	uint8_t* output, int output_size,
+	RawPHeader* hdr
 ) {
-	if(data == NULL || data_size <= 0) {
-		return NULL;
+	if(data == NULL || data_size < kRawPHeaderSize) {
+		return 0;
+	}
+	if(output == NULL || output_size <= 0) {
+		return 0;
+	}
+	if(hdr == NULL) {
+		return 0;
 	}
 
-	RawHeader hdr;
-	if(!rawGetHeader(data, data_size, &hdr)) {
-		return NULL;
+	if(!rawpDecodeHeader(data, data_size, hdr)) {
+		return 0;
+	}
+	if(data_size < (kRawPHeaderSize+int(hdr->DataSize))) {
+		return 0;
+	}
+	if(output_size < hdr->Width*hdr->Height*hdr->Channels*hdr->Depth/8) {
+		return 0;
 	}
 
-	if(width != NULL) {
-		*width = hdr.Width;
-	}
-	if(height != NULL) {
-		*height = hdr.Height;
-	}
-	if(channels != NULL) {
-		*channels = hdr.Channels;
-	}
-	if(data_type != NULL) {
-		*data_type = hdr.DataType;
-	}
-
-	if(hdr.UseRC32) {
-		if(rawHashCRC32((const char*)data, data_size) != hdr.CheckSum) {
+	if(hdr->UseRC32) {
+		if(rawHashCRC32((const char*)data, (kRawPHeaderSize+hdr->DataSize)-4) != hdr->CheckSum) {
 			return NULL;
 		}
 	}
-
-	int imageSize = hdr.Width*hdr.Height*hdr.Channels*hdr.Depth/8;
-	uint8_t*pix = (uint8_t*)malloc(imageSize);
-	if(!pix) {
-		return NULL;
-	}
-
-	if(hdr.UseSnappy) {
-		if(!raw::snappy::RawUncompress((const char*)hdr.Data, (size_t)hdr.DataSize, (char*)pix)) {
-			free(pix);
-			return NULL;
+	if(hdr->UseSnappy) {
+		if(!raw::snappy::RawUncompress((const char*)hdr->Data, (size_t)hdr->DataSize, (char*)output)) {
+			return 0;
 		}
-		return pix;
 	} else {
-		memcpy(pix, hdr.Data, imageSize);
-		return pix;
+		memcpy(output, hdr->Data, hdr->Width*hdr->Height*hdr->Channels*hdr->Depth/8);
 	}
+	return 1;
 }
 
-size_t rawEncode(
+int rawpEncodeInit(
 	const uint8_t* pix, int width, int height, int stride,
 	int channels, int depth, int data_type,
-	const RawEncodeOptions* opt,
-	uint8_t** output
+	const RawPEncodeOptions* opt,
+	RawPEncodeContext* ctx
 ) {
-	if(pix == NULL || width <= 0 || height <= 0 || stride < 0) {
+	if(pix == NULL || width <= 0 || height <= 0) {
 		return 0;
 	}
-	if(channels <= 0 || !rawIsValidDepth(depth) || !rawIsValidDataType(data_type)) {
+	if(channels <= 0 || !rawpIsValidDepth(depth) || !rawpIsValidDataType(data_type)) {
 		return 0;
 	}
-	if(output == NULL) {
-		return 0;
-	}
-
-	if(stride == 0) {
-		stride = width*channels*depth/8;
-	}
-	if(stride < width*channels*depth/8) {
+	if(ctx == NULL) {
 		return 0;
 	}
 
-	RawHeader hdr[1];
-	memset(&hdr, 0, sizeof(hdr));
-	hdr->Sig = kRawMagic;
-	hdr->UseRC32 = (opt != NULL)? opt->UseRC32: false;
-	hdr->UseSnappy = (opt != NULL)? opt->UseSnappy: false;
-	hdr->DataType = data_type;
-	hdr->Depth = depth;
-	hdr->Channels = channels;
-	hdr->Width = width;
-	hdr->Height = height;
-	hdr->DataSize = width*height*channels*depth/8;
-	hdr->CheckSum = kRawMagic;
+	memset(ctx, 0, sizeof(*ctx));
 
-	int bufferSize = kRawHeaderSize + (
-		hdr->UseSnappy? raw::snappy::MaxCompressedLength(hdr->DataSize):
-		hdr->DataSize
+	ctx->Header.Sig[0] = 'R'; // RawP
+	ctx->Header.Sig[1] = 'a';
+	ctx->Header.Sig[2] = 'w';
+	ctx->Header.Sig[3] = 'P';
+	ctx->Header.Magic = kRawPMagic;
+	ctx->Header.UseRC32 = (opt != NULL)? opt->UseRC32: false;
+	ctx->Header.UseSnappy = (opt != NULL)? opt->UseSnappy: false;
+	ctx->Header.DataType = data_type;
+	ctx->Header.Depth = depth;
+	ctx->Header.Channels = channels;
+	ctx->Header.Width = width;
+	ctx->Header.Height = height;
+	ctx->Header.DataSize = width*height*channels*depth/8;
+	ctx->Header.CheckSum = kRawPMagic;
+
+	ctx->Pix = (uint8_t*)pix;
+	ctx->MaxEncodedLength = kRawPHeaderSize + (
+		ctx->Header.UseSnappy? raw::snappy::MaxCompressedLength(ctx->Header.DataSize):
+		ctx->Header.DataSize
 	);
-	uint8_t* buffer = (uint8_t*)malloc(bufferSize);
-	if(buffer == NULL) {
+
+	return 1;
+}
+
+size_t rawpEncode(
+	RawPEncodeContext* ctx,
+	uint8_t* output
+) {
+	if(ctx == NULL || output == NULL) {
 		return 0;
 	}
+	RawPHeader* hdr = &(ctx->Header);
 
 	// write header
-	uint8_t* p = buffer;
+	uint8_t* p = output;
 	memcpy(p, &hdr->Sig, sizeof(hdr->Sig));
 	p += sizeof(hdr->Sig);
 	memcpy(p, &hdr->UseRC32, sizeof(hdr->UseRC32));
@@ -244,10 +244,10 @@ size_t rawEncode(
 	uint8_t* pDataBuf = p + sizeof(hdr->DataSize);
 	if(hdr->UseSnappy) {
 		size_t output_length;
-		raw::snappy::RawCompress((const char*)pix, hdr->DataSize, (char*)pDataBuf, &output_length);
+		raw::snappy::RawCompress((const char*)ctx->Pix, hdr->DataSize, (char*)pDataBuf, &output_length);
 		hdr->DataSize = output_length;
 	} else {
-		memcpy(pDataBuf, pix, hdr->DataSize);
+		memcpy(pDataBuf, ctx->Pix, hdr->DataSize);
 	}
 	memcpy(p, &hdr->DataSize, sizeof(hdr->DataSize));
 	p += sizeof(hdr->DataSize);
@@ -256,16 +256,12 @@ size_t rawEncode(
 
 	// write crc32
 	if(hdr->UseRC32) {
-		hdr->CheckSum = rawHashCRC32((const char*)buffer, p-buffer);
+		hdr->CheckSum = rawHashCRC32((const char*)output, p-output);
 	}
 	memcpy(p, &hdr->CheckSum, sizeof(hdr->CheckSum));
 	p += sizeof(hdr->CheckSum);
 
 	// OK
-	*output = buffer;
-	return p-buffer;
+	return size_t(p-output);
 }
 
-void rawFree(void* p) {
-	free(p);
-}
