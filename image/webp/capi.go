@@ -5,7 +5,7 @@
 package webp
 
 /*
-#cgo CFLAGS: -I./libwebp/include  -I./libwebp/src
+#cgo CFLAGS: -I./libwebp/include  -I./libwebp/src -DWEBP_EXPERIMENTAL_FEATURES
 
 #include "webp.h"
 */

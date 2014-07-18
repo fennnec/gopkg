@@ -13,6 +13,9 @@ import (
 	_ "github.com/chai2010/gopkg/image/png"
 )
 
+// 做成列表测试
+// 知道压缩的参数
+
 func TestEncode(t *testing.T) {
 	img0, _, err := image_ext.Load(testdataDir + "video-001.png")
 	if err != nil {
@@ -32,6 +35,30 @@ func TestEncode(t *testing.T) {
 
 	// Compare the average delta to the tolerance level.
 	want := int64(12 << 8)
+	if got := averageDelta(img0, img1); got > want {
+		t.Fatalf("average delta too high; got %d, want <= %d", got, want)
+	}
+}
+
+func TestEncodeLossless(t *testing.T) {
+	img0, _, err := image_ext.Load(testdataDir + "video-001.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	buf := new(bytes.Buffer)
+	err = Encode(buf, img0, &Options{Lossless: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	img1, err := Decode(buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Compare the average delta to the tolerance level.
+	want := int64(0)
 	if got := averageDelta(img0, img1); got > want {
 		t.Fatalf("average delta too high; got %d, want <= %d", got, want)
 	}

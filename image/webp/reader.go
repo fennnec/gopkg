@@ -6,21 +6,50 @@ package webp
 
 import (
 	"image"
+	"image/color"
 	"io"
+	"io/ioutil"
 
-	"code.google.com/p/go.image/webp"
 	image_ext "github.com/chai2010/gopkg/image"
+	color_ext "github.com/chai2010/gopkg/image/color"
 )
 
 // Decode reads a WEBP image from r and returns it as an image.Image.
-func Decode(r io.Reader) (image.Image, error) {
-	return webp.Decode(r)
+func Decode(r io.Reader) (m image.Image, err error) {
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return
+	}
+	_, _, hasAlpha, err := GetInfo(data)
+	if err != nil {
+		return
+	}
+	if hasAlpha {
+		return DecodeRGBA(data)
+	} else {
+		return DecodeRGB(data)
+	}
 }
 
 // DecodeConfig returns the color model and dimensions of a WEBP image without
 // decoding the entire image.
 func DecodeConfig(r io.Reader) (config image.Config, err error) {
-	return webp.DecodeConfig(r)
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return
+	}
+	width, height, hasAlpha, err := GetInfo(data)
+	if err != nil {
+		return
+	}
+	config.Width = width
+	config.Height = height
+	if hasAlpha {
+		config.ColorModel = color.RGBAModel
+	} else {
+		config.ColorModel = color_ext.RGBModel
+	}
+	return
 }
 
 func encode(w io.Writer, m image.Image, opt interface{}) error {

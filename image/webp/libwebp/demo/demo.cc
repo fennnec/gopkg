@@ -9,6 +9,7 @@
 #include <string.h>
 #include <webp/types.h>
 #include <webp/encode.h>
+#include <webp/decode.h>
 
 uint8_t interpolate(float v0, float v1, float x) {
 	return (uint8_t)(v0 + x * (v1 - v0));
@@ -22,17 +23,26 @@ int webpWriter(const uint8_t* data, size_t data_size, const WebPPicture* const p
 int WebPImportGray(const uint8_t* gray_data, WebPPicture* pic) {
 	int y, width, uv_width;
 	if (pic == NULL || gray_data == NULL) return 0;
+#if defined(WEBP_EXPERIMENTAL_FEATURES)
+	pic->colorspace = WEBP_YUV400;
+#else
 	pic->colorspace = WEBP_YUV420;
-	if (!WebPPictureAlloc(pic)) return 0;
+#endif
+	if (!WebPPictureAlloc(pic)) {
+		return 0;
+	}
 	width = pic->width;
 	uv_width = (width + 1) >> 1;
-	for (y = 0; y < pic->height; ++y) {
+	for(y = 0; y < pic->height; ++y) {
 		memcpy(pic->y + y * pic->y_stride, gray_data, width);
-		gray_data += width;    // <- we could use some 'data_stride' here if needed
-		if ((y & 1) == 0) {
+		gray_data += width;
+#if !defined(WEBP_EXPERIMENTAL_FEATURES)
+		// WEBP_YUV420
+		if((y & 1) == 0) {
 			memset(pic->u + (y >> 1) * pic->uv_stride, 128, uv_width);
 			memset(pic->v + (y >> 1) * pic->uv_stride, 128, uv_width);
 		}
+#endif
 	}
 	return 1;
 }
@@ -62,8 +72,8 @@ int main() {
 
 	pic.custom_ptr = fopen("output.webp", "wb");
 	if(!WebPImportGray(gray_data, &pic)) {
-		printf("Error!\n");
-		ret = -1;
+		printf("ERR: WebPImportGray failed!\n");
+		return -1;
 	}
 	free(gray_data);
 
@@ -72,5 +82,18 @@ int main() {
 	WebPEncode(&config, &pic);
 
 	WebPPictureFree(&pic);
-	return ret;
+
+	uint8_t* rgb = (uint8_t*)malloc(width*height*3);
+	uint8_t* output;
+	size_t output_size;
+	output_size = WebPEncodeLosslessRGB(rgb, width, height, width*3, &output);
+
+	int new_w, new_h;
+	if(!WebPGetInfo(output, output_size, &new_w, &new_h)) {
+		printf("ERR: WebPImportGray failed!\n");
+		return -1;
+	}
+	printf("WebPGetInfo: width = %d, height = %d\n", new_w, new_h);
+
+	return 0;
 }

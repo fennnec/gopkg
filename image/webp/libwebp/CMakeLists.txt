@@ -22,6 +22,11 @@ endif()
 
 #------------------------------------------------------------------------------
 
+# Extra flags to enable experimental features and code
+add_definitions(
+  -DWEBP_EXPERIMENTAL_FEATURES
+)
+
 include_directories(AFTER
   ./include
   ./src/webp

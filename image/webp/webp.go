@@ -10,25 +10,15 @@ package webp
 
 import (
 	"image"
-	"io"
-	"io/ioutil"
 
 	image_ext "github.com/chai2010/gopkg/image"
 )
 
-func GetInfo(r io.Reader) (width, height int, hasAlpha bool, err error) {
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return
-	}
+func GetInfo(data []byte) (width, height int, hasAlpha bool, err error) {
 	return webpGetInfo(data)
 }
 
-func DecodeGray(r io.Reader) (m *image.Gray, err error) {
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return
-	}
+func DecodeGray(data []byte) (m *image.Gray, err error) {
 	pix, w, h, err := webpDecodeGray(data)
 	if err != nil {
 		return
@@ -37,11 +27,7 @@ func DecodeGray(r io.Reader) (m *image.Gray, err error) {
 	return
 }
 
-func DecodeRGB(r io.Reader) (m *image_ext.RGB, err error) {
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return
-	}
+func DecodeRGB(data []byte) (m *image_ext.RGB, err error) {
 	pix, w, h, err := webpDecodeRGB(data)
 	if err != nil {
 		return
@@ -50,11 +36,7 @@ func DecodeRGB(r io.Reader) (m *image_ext.RGB, err error) {
 	return
 }
 
-func DecodeRGBA(r io.Reader) (m *image.RGBA, err error) {
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return
-	}
+func DecodeRGBA(data []byte) (m *image.RGBA, err error) {
 	pix, w, h, err := webpDecodeRGBA(data)
 	if err != nil {
 		return
@@ -63,56 +45,26 @@ func DecodeRGBA(r io.Reader) (m *image.RGBA, err error) {
 	return
 }
 
-func EncodeGray(w io.Writer, m *image.Gray, quality float32) (err error) {
-	output, err := webpEncodeGray(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride, quality)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(output)
-	return
+func EncodeGray(m *image.Gray, quality float32) (data []byte, err error) {
+	return webpEncodeGray(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride, quality)
 }
 
-func EncodeRGB(w io.Writer, m *image_ext.RGB, quality float32) (err error) {
-	output, err := webpEncodeRGB(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride, quality)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(output)
-	return
+func EncodeRGB(m *image_ext.RGB, quality float32) (data []byte, err error) {
+	return webpEncodeRGB(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride, quality)
 }
 
-func EncodeRGBA(w io.Writer, m *image.RGBA, quality float32) (err error) {
-	output, err := webpEncodeRGBA(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride, quality)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(output)
-	return
+func EncodeRGBA(m *image.RGBA, quality float32) (data []byte, err error) {
+	return webpEncodeRGBA(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride, quality)
 }
 
-func EncodeLosslessGray(w io.Writer, m *image.Gray) (err error) {
-	output, err := webpEncodeLosslessGray(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(output)
-	return
+func EncodeLosslessGray(m *image.Gray) (data []byte, err error) {
+	return webpEncodeLosslessGray(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride)
 }
 
-func EncodeLosslessRGB(w io.Writer, m *image_ext.RGB) (err error) {
-	output, err := webpEncodeLosslessRGB(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(output)
-	return
+func EncodeLosslessRGB(m *image_ext.RGB) (data []byte, err error) {
+	return webpEncodeLosslessRGB(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride)
 }
 
-func EncodeLosslessRGBA(w io.Writer, m *image.RGBA) (err error) {
-	output, err := webpEncodeLosslessRGBA(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(output)
-	return
+func EncodeLosslessRGBA(m *image.RGBA) (data []byte, err error) {
+	return webpEncodeLosslessRGBA(m.Pix, m.Rect.Dx(), m.Rect.Dy(), m.Stride)
 }

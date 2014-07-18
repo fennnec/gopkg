@@ -21,15 +21,24 @@ type Options struct {
 }
 
 // Encode writes the image m to w in WEBP format.
-func Encode(w io.Writer, m image.Image, opt *Options) error {
+func Encode(w io.Writer, m image.Image, opt *Options) (err error) {
+	var output []byte
 	if opt != nil && opt.Lossless {
 		switch m := adjustImage(m).(type) {
 		case *image.Gray:
-			return EncodeLosslessGray(w, m)
+			if output, err = EncodeLosslessGray(m); err != nil {
+				return
+			}
 		case *image_ext.RGB:
-			return EncodeLosslessRGB(w, m)
+			if output, err = EncodeLosslessRGB(m); err != nil {
+				return
+			}
 		case *image.RGBA:
-			return EncodeLosslessRGBA(w, m)
+			if output, err = EncodeLosslessRGBA(m); err != nil {
+				return
+			}
+		default:
+			panic("image/webp: Encode, unreachable!")
 		}
 	} else {
 		quality := float32(DefaulQuality)
@@ -38,14 +47,23 @@ func Encode(w io.Writer, m image.Image, opt *Options) error {
 		}
 		switch m := adjustImage(m).(type) {
 		case *image.Gray:
-			return EncodeGray(w, m, quality)
+			if output, err = EncodeGray(m, quality); err != nil {
+				return
+			}
 		case *image_ext.RGB:
-			return EncodeRGB(w, m, quality)
+			if output, err = EncodeRGB(m, quality); err != nil {
+				return
+			}
 		case *image.RGBA:
-			return EncodeRGBA(w, m, quality)
+			if output, err = EncodeRGBA(m, quality); err != nil {
+				return
+			}
+		default:
+			panic("image/webp: Encode, unreachable!")
 		}
 	}
-	panic("image/webp: Encode, unreachable!")
+	_, err = w.Write(output)
+	return
 }
 
 func adjustImage(m image.Image) image.Image {
