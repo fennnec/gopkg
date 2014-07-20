@@ -7,6 +7,7 @@ package rawp
 
 import (
 	"image"
+	"image/color"
 	"io"
 
 	image_ext "github.com/chai2010/gopkg/image"
@@ -15,8 +16,10 @@ import (
 const (
 	rawpHeaderSize = 25
 	rawpMagic      = 0x1BF2380A
+)
 
-	// data type
+// data type
+const (
 	DataType_UInt  = 1
 	DataType_Int   = 2
 	DataType_Float = 3
@@ -39,8 +42,9 @@ type RawPHeader struct {
 }
 
 type Options struct {
-	UseCRC32  bool // 0=disabled, 1=enabled (RawPHeader.CheckSum)
-	UseSnappy bool // 0=disabled, 1=enabled (RawPHeader.Data)
+	ColorModel color.Model
+	UseCRC32   bool // 0=disabled, 1=enabled (RawPHeader.CheckSum)
+	UseSnappy  bool // 0=disabled, 1=enabled (RawPHeader.Data)
 }
 
 func DecodeHeader(data []byte) (hdr *RawPHeader, err error) {
@@ -51,7 +55,7 @@ func DecodeConfig(r io.Reader) (config image.Config, err error) {
 	return
 }
 
-func Decode(r io.Reader) (m image.Image, err error) {
+func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
 	return
 }
 
@@ -59,7 +63,19 @@ func Encode(w io.Writer, m image.Image, opt *Options) (err error) {
 	return
 }
 
-func encode(w io.Writer, m image.Image, opt interface{}) error {
+func imageDecode(r io.Reader) (image.Image, error) {
+	return Decode(r, nil)
+}
+
+func imageExtDecode(r io.Reader, opt interface{}) (image.Image, error) {
+	if opt, ok := opt.(*Options); ok {
+		return Decode(r, opt)
+	} else {
+		return Decode(r, nil)
+	}
+}
+
+func imageExtEncode(w io.Writer, m image.Image, opt interface{}) error {
 	if opt, ok := opt.(*Options); ok {
 		return Encode(w, m, opt)
 	} else {
@@ -68,9 +84,14 @@ func encode(w io.Writer, m image.Image, opt interface{}) error {
 }
 
 func init() {
-	image_ext.RegisterFormat(
-		"rawp", "RAWP\x1B\xF2\x38\x0A", // rawpMagic
-		Decode, DecodeConfig,
-		encode,
-	)
+	image.RegisterFormat("rawp", "RAWP\x1B\xF2\x38\x0A", imageDecode, DecodeConfig)
+
+	image_ext.RegisterFormat(image_ext.Format{
+		Name:         "rawp",
+		Extensions:   []string{".rawp"},
+		Magics:       []string{"RAWP\x1B\xF2\x38\x0A"}, // rawpMagic
+		DecodeConfig: DecodeConfig,
+		Decode:       imageExtDecode,
+		Encode:       imageExtEncode,
+	})
 }

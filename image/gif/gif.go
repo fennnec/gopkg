@@ -9,15 +9,28 @@ package gif
 
 import (
 	"image"
+	"image/color"
 	"image/gif"
 	"io"
 
 	image_ext "github.com/chai2010/gopkg/image"
 )
 
+// Options are the encoding and decoding parameters.
+type Options struct {
+	*gif.Options
+	ColorModel color.Model
+}
+
+// DecodeConfig returns the global color model and dimensions of a GIF image
+// without decoding the entire image.
+func DecodeConfig(r io.Reader) (config image.Config, err error) {
+	return gif.DecodeConfig(r)
+}
+
 // Decode reads a GIF image from r and returns the first embedded
 // image as an image.Image.
-func Decode(r io.Reader) (image.Image, error) {
+func Decode(r io.Reader, opt *Options) (image.Image, error) {
 	return gif.Decode(r)
 }
 
@@ -27,12 +40,6 @@ func DecodeAll(r io.Reader) (*gif.GIF, error) {
 	return gif.DecodeAll(r)
 }
 
-// DecodeConfig returns the global color model and dimensions of a GIF image
-// without decoding the entire image.
-func DecodeConfig(r io.Reader) (config image.Config, err error) {
-	return gif.DecodeConfig(r)
-}
-
 // EncodeAll writes the images in g to w in GIF format with the
 // given loop count and delay between frames.
 func EncodeAll(w io.Writer, g *gif.GIF) error {
@@ -40,12 +47,24 @@ func EncodeAll(w io.Writer, g *gif.GIF) error {
 }
 
 // Encode writes the Image m to w in GIF format.
-func Encode(w io.Writer, m image.Image, o *gif.Options) error {
-	return gif.Encode(w, m, o)
+func Encode(w io.Writer, m image.Image, opt *Options) error {
+	if opt != nil && opt.Options != nil {
+		return gif.Encode(w, m, opt.Options)
+	} else {
+		return gif.Encode(w, m, nil)
+	}
 }
 
-func encode(w io.Writer, m image.Image, opt interface{}) error {
-	if opt, ok := opt.(*gif.Options); ok {
+func imageExtDecode(r io.Reader, opt interface{}) (image.Image, error) {
+	if opt, ok := opt.(*Options); ok {
+		return Decode(r, opt)
+	} else {
+		return Decode(r, nil)
+	}
+}
+
+func imageExtEncode(w io.Writer, m image.Image, opt interface{}) error {
+	if opt, ok := opt.(*Options); ok {
 		return Encode(w, m, opt)
 	} else {
 		return Encode(w, m, nil)
@@ -53,9 +72,12 @@ func encode(w io.Writer, m image.Image, opt interface{}) error {
 }
 
 func init() {
-	image_ext.RegisterFormat(
-		"gif", "GIF8?a",
-		Decode, DecodeConfig,
-		encode,
-	)
+	image_ext.RegisterFormat(image_ext.Format{
+		Name:         "gif",
+		Extensions:   []string{".gif"},
+		Magics:       []string{"GIF8?a"},
+		DecodeConfig: DecodeConfig,
+		Decode:       imageExtDecode,
+		Encode:       imageExtEncode,
+	})
 }

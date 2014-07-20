@@ -9,15 +9,17 @@ package jpeg
 
 import (
 	"image"
+	"image/color"
 	"image/jpeg"
 	"io"
 
 	image_ext "github.com/chai2010/gopkg/image"
 )
 
-// Decode reads a JPEG image from r and returns it as an image.Image.
-func Decode(r io.Reader) (image.Image, error) {
-	return jpeg.Decode(r)
+// Options are the encoding and decoding parameters.
+type Options struct {
+	*jpeg.Options
+	ColorModel color.Model
 }
 
 // DecodeConfig returns the color model and dimensions of a JPEG image without
@@ -26,14 +28,31 @@ func DecodeConfig(r io.Reader) (config image.Config, err error) {
 	return jpeg.DecodeConfig(r)
 }
 
-// Encode writes the Image m to w in JPEG 4:2:0 baseline format with the given
-// options. Default parameters are used if a nil *Options is passed.
-func Encode(w io.Writer, m image.Image, o *jpeg.Options) error {
-	return jpeg.Encode(w, m, o)
+// Decode reads a JPEG image from r and returns it as an image.Image.
+func Decode(r io.Reader, opt *Options) (image.Image, error) {
+	return jpeg.Decode(r)
 }
 
-func encode(w io.Writer, m image.Image, opt interface{}) error {
-	if opt, ok := opt.(*jpeg.Options); ok {
+// Encode writes the Image m to w in JPEG 4:2:0 baseline format with the given
+// options. Default parameters are used if a nil *Options is passed.
+func Encode(w io.Writer, m image.Image, opt *Options) error {
+	if opt != nil && opt.Options != nil {
+		return jpeg.Encode(w, m, opt.Options)
+	} else {
+		return jpeg.Encode(w, m, nil)
+	}
+}
+
+func imageExtDecode(r io.Reader, opt interface{}) (image.Image, error) {
+	if opt, ok := opt.(*Options); ok {
+		return Decode(r, opt)
+	} else {
+		return Decode(r, nil)
+	}
+}
+
+func imageExtEncode(w io.Writer, m image.Image, opt interface{}) error {
+	if opt, ok := opt.(*Options); ok {
 		return Encode(w, m, opt)
 	} else {
 		return Encode(w, m, nil)
@@ -41,14 +60,12 @@ func encode(w io.Writer, m image.Image, opt interface{}) error {
 }
 
 func init() {
-	image_ext.RegisterFormat(
-		"jpeg", "\xff\xd8",
-		Decode, DecodeConfig,
-		encode,
-	)
-	image_ext.RegisterFormat(
-		"jpg", "\xff\xd8",
-		Decode, DecodeConfig,
-		encode,
-	)
+	image_ext.RegisterFormat(image_ext.Format{
+		Name:         "jpeg",
+		Extensions:   []string{".jpeg", ".jpg"},
+		Magics:       []string{"\xff\xd8"},
+		DecodeConfig: DecodeConfig,
+		Decode:       imageExtDecode,
+		Encode:       imageExtEncode,
+	})
 }

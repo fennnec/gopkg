@@ -17,12 +17,12 @@ const testdataDir = "../testdata/"
 // TestDecode tests that decoding a PNG image and a BMP image result in the
 // same pixel data.
 func TestDecode(t *testing.T) {
-	img0, _, err := image_ext.Load(testdataDir + "video-001.png")
+	img0, _, err := image_ext.Load(testdataDir+"video-001.png", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	img1, _, err := image_ext.Load(testdataDir + "video-001.webp")
+	img1, _, err := image_ext.Load(testdataDir+"video-001.webp", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

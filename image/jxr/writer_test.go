@@ -18,7 +18,7 @@ func openImage(filename string) (image.Image, error) {
 		return nil, err
 	}
 	defer f.Close()
-	return Decode(f)
+	return Decode(f, nil)
 }
 
 func TestEncode(t *testing.T) {
@@ -28,12 +28,12 @@ func TestEncode(t *testing.T) {
 	}
 
 	buf := new(bytes.Buffer)
-	err = Encode(buf, img0)
+	err = Encode(buf, img0, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	img1, err := Decode(buf)
+	img1, err := Decode(buf, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,6 +51,6 @@ func BenchmarkEncode(b *testing.B) {
 	b.SetBytes(int64(s.X * s.Y * 4))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Encode(ioutil.Discard, img)
+		Encode(ioutil.Discard, img, nil)
 	}
 }

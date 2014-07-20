@@ -12,14 +12,6 @@ import (
 	image_ext "github.com/chai2010/gopkg/image"
 )
 
-const DefaulQuality = 90
-
-// Options are the encoding parameters.
-type Options struct {
-	Lossless bool
-	Quality  float32 // 0 ~ 100
-}
-
 // Encode writes the image m to w in WEBP format.
 func Encode(w io.Writer, m image.Image, opt *Options) (err error) {
 	var output []byte

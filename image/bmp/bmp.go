@@ -9,16 +9,16 @@ package bmp
 
 import (
 	"image"
+	"image/color"
 	"io"
 
 	"code.google.com/p/go.image/bmp"
 	image_ext "github.com/chai2010/gopkg/image"
 )
 
-// Decode reads a BMP image from r and returns it as an image.Image.
-// Limitation: The file must be 8 or 24 bits per pixel.
-func Decode(r io.Reader) (image.Image, error) {
-	return bmp.Decode(r)
+// Options are the encoding and decoding parameters.
+type Options struct {
+	ColorModel color.Model
 }
 
 // DecodeConfig returns the color model and dimensions of a BMP image without
@@ -28,19 +28,40 @@ func DecodeConfig(r io.Reader) (config image.Config, err error) {
 	return bmp.DecodeConfig(r)
 }
 
+// Decode reads a BMP image from r and returns it as an image.Image.
+// Limitation: The file must be 8 or 24 bits per pixel.
+func Decode(r io.Reader, opt *Options) (image.Image, error) {
+	return bmp.Decode(r)
+}
+
 // Encode writes the image m to w in BMP format.
-func Encode(w io.Writer, m image.Image) error {
+func Encode(w io.Writer, m image.Image, opt *Options) error {
 	return bmp.Encode(w, m)
 }
 
-func encode(w io.Writer, m image.Image, opt interface{}) error {
-	return Encode(w, m)
+func imageExtDecode(r io.Reader, opt interface{}) (image.Image, error) {
+	if opt, ok := opt.(*Options); ok {
+		return Decode(r, opt)
+	} else {
+		return Decode(r, nil)
+	}
+}
+
+func imageExtEncode(w io.Writer, m image.Image, opt interface{}) error {
+	if opt, ok := opt.(*Options); ok {
+		return Encode(w, m, opt)
+	} else {
+		return Encode(w, m, nil)
+	}
 }
 
 func init() {
-	image_ext.RegisterFormat(
-		"bmp", "BM????\x00\x00\x00\x00",
-		Decode, DecodeConfig,
-		encode,
-	)
+	image_ext.RegisterFormat(image_ext.Format{
+		Name:         "bmp",
+		Extensions:   []string{".bmp"},
+		Magics:       []string{"BM????\x00\x00\x00\x00"},
+		DecodeConfig: DecodeConfig,
+		Decode:       imageExtDecode,
+		Encode:       imageExtEncode,
+	})
 }

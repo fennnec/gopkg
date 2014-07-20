@@ -49,7 +49,7 @@ var tTesterList = []tTester{
 
 func TestEncode(t *testing.T) {
 	for i, v := range tTesterList {
-		img0, _, err := image_ext.Load(testdataDir + v.Filename)
+		img0, _, err := image_ext.Load(testdataDir+v.Filename, nil)
 		if err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
@@ -63,7 +63,7 @@ func TestEncode(t *testing.T) {
 			t.Fatalf("%d: %v", i, err)
 		}
 
-		img1, err := Decode(buf)
+		img1, err := Decode(buf, nil)
 		if err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
@@ -78,7 +78,7 @@ func TestEncode(t *testing.T) {
 
 // BenchmarkEncode benchmarks the encoding of an image.
 func BenchmarkEncode(b *testing.B) {
-	img, _, err := image_ext.Load(testdataDir + "video-001.png")
+	img, _, err := image_ext.Load(testdataDir+"video-001.png", nil)
 	if err != nil {
 		b.Fatal(err)
 	}

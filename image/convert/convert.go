@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package image
+// Package convert implements some image convert functions.
+package convert
 
 import (
 	"image"
@@ -10,6 +11,42 @@ import (
 
 	color_ext "github.com/chai2010/gopkg/image/color"
 )
+
+func Gray(m image.Image) *image.Gray {
+	return nil
+}
+
+func Gray16(m image.Image) *image.Gray16 {
+	return nil
+}
+
+func Gray32f(m image.Image) *image_ext.Gray32f {
+	return nil
+}
+
+func RGB(m image.Image) *image_ext.RGB {
+	return nil
+}
+
+func RGB48(m image.Image) *image_ext.RGB48 {
+	return nil
+}
+
+func RGB96f(m image.Image) *image_ext.RGB96f {
+	return nil
+}
+
+func RGBA(m image.Image) *image.RGBA {
+	return nil
+}
+
+func RGBA64(m image.Image) *image.RGBA64 {
+	return nil
+}
+
+func RGBA128f(m image.Image) *image_ext.RGBA128f {
+	return nil
+}
 
 func Convert(m image.Image, isColor bool) image.Image {
 	if isColor {
@@ -23,7 +60,7 @@ func convertToColor(m image.Image) image.Image {
 	switch m := m.(type) {
 	case *image.Gray:
 		b := m.Bounds()
-		rgb := NewRGB(b)
+		rgb := image_ext.NewRGB(b)
 		for y := b.Min.Y; y < b.Max.Y; y++ {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.GrayAt(x, y)
@@ -37,7 +74,7 @@ func convertToColor(m image.Image) image.Image {
 		return rgb
 	case *image.Gray16:
 		b := m.Bounds()
-		rgb48 := NewRGB48(b)
+		rgb48 := image_ext.NewRGB48(b)
 		for y := b.Min.Y; y < b.Max.Y; y++ {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.Gray16At(x, y)
@@ -51,7 +88,7 @@ func convertToColor(m image.Image) image.Image {
 		return rgb48
 	case *Gray32f:
 		b := m.Bounds()
-		rgb96f := NewRGB96f(b)
+		rgb96f := image_ext.NewRGB96f(b)
 		for y := b.Min.Y; y < b.Max.Y; y++ {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.Gray32fAt(x, y)
@@ -65,7 +102,7 @@ func convertToColor(m image.Image) image.Image {
 		return rgb96f
 	case *image.YCbCr:
 		b := m.Bounds()
-		rgb := NewRGB(b)
+		rgb := image_ext.NewRGB(b)
 		for y := b.Min.Y; y < b.Max.Y; y++ {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				v := m.YCbCrAt(x, y)
@@ -82,7 +119,7 @@ func convertToColor(m image.Image) image.Image {
 		switch m.Palette[0].(type) {
 		case color.Gray:
 			b := m.Bounds()
-			rgb := NewRGB(b)
+			rgb := image_ext.NewRGB(b)
 			for y := b.Min.Y; y < b.Max.Y; y++ {
 				for x := b.Min.X; x < b.Max.X; x++ {
 					v := m.At(x, y).(color.Gray)
@@ -96,7 +133,7 @@ func convertToColor(m image.Image) image.Image {
 			return rgb
 		case color.Gray16:
 			b := m.Bounds()
-			rgb48 := NewRGB48(b)
+			rgb48 := image_ext.NewRGB48(b)
 			for y := b.Min.Y; y < b.Max.Y; y++ {
 				for x := b.Min.X; x < b.Max.X; x++ {
 					v := m.At(x, y).(color.Gray16)
@@ -110,7 +147,7 @@ func convertToColor(m image.Image) image.Image {
 			return rgb48
 		case color_ext.Gray32f:
 			b := m.Bounds()
-			rgb96f := NewRGB96f(b)
+			rgb96f := image_ext.NewRGB96f(b)
 			for y := b.Min.Y; y < b.Max.Y; y++ {
 				for x := b.Min.X; x < b.Max.X; x++ {
 					v := m.At(x, y).(color_ext.Gray32f)
@@ -124,7 +161,7 @@ func convertToColor(m image.Image) image.Image {
 			return rgb96f
 		case color.YCbCr:
 			b := m.Bounds()
-			rgb := NewRGB(b)
+			rgb := image_ext.NewRGB(b)
 			for y := b.Min.Y; y < b.Max.Y; y++ {
 				for x := b.Min.X; x < b.Max.X; x++ {
 					v := m.At(x, y).(color.YCbCr)
@@ -168,7 +205,7 @@ func convertToGray(m image.Image) image.Image {
 		return gray16
 	case *RGB96f:
 		b := m.Bounds()
-		gray32f := NewGray32f(b)
+		gray32f := image_ext.NewGray32f(b)
 		for y := b.Min.Y; y < b.Max.Y; y++ {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				gray32f.SetGray32f(x, y,
@@ -201,7 +238,7 @@ func convertToGray(m image.Image) image.Image {
 		return gray16
 	case *RGBA128f:
 		b := m.Bounds()
-		gray32f := NewGray32f(b)
+		gray32f := image_ext.NewGray32f(b)
 		for y := b.Min.Y; y < b.Max.Y; y++ {
 			for x := b.Min.X; x < b.Max.X; x++ {
 				gray32f.SetGray32f(x, y,
@@ -243,7 +280,7 @@ func convertToGray(m image.Image) image.Image {
 			return gray16
 		case color_ext.RGB96f, color_ext.RGBA128f:
 			b := m.Bounds()
-			gray32f := NewGray32f(b)
+			gray32f := image_ext.NewGray32f(b)
 			for y := b.Min.Y; y < b.Max.Y; y++ {
 				for x := b.Min.X; x < b.Max.X; x++ {
 					gray32f.SetGray32f(x, y,

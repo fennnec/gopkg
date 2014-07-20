@@ -74,14 +74,14 @@ func TestFormats(t *testing.T) {
 	os.MkdirAll("tempdir", 0666)
 	defer os.RemoveAll("tempdir")
 
-	golden, _, err := image_ext.Load("testdata/video-001.png")
+	golden, _, err := image_ext.Load("testdata/video-001.png", nil)
 	if err != nil {
 		t.Fatalf("Load golden fialed: %v", err)
 	}
 
 	for i, v := range tFormatTesterList {
 		if v.DecodeEnabled {
-			m, format, err := image_ext.Load("testdata/" + v.FileName)
+			m, format, err := image_ext.Load("testdata/"+v.FileName, nil)
 			if err != nil {
 				t.Fatalf("%d, Load(%q) fail: %v", i, v.FileName, err)
 			}
@@ -102,13 +102,13 @@ func TestFormats(t *testing.T) {
 			}
 		}
 		if v.EncodeEnabled && v.DecodeEnabled {
-			err := image_ext.Save("tempdir/"+v.FileName, "", golden)
+			err := image_ext.Save("tempdir/"+v.FileName, golden, nil)
 			if err != nil {
 				t.Fatalf("%d, Save(%q) fail: %v", i, v.FileName, err)
 			}
 
 			// load again
-			m, format, err := image_ext.Load("tempdir/" + v.FileName)
+			m, format, err := image_ext.Load("tempdir/"+v.FileName, nil)
 			if err != nil {
 				t.Fatalf("%d, Load(%q) fail: %v", i, v.FileName, err)
 			}

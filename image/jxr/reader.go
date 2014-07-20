@@ -71,6 +71,11 @@ func decodeConfig(data []byte) (config image.Config, err error) {
 	return
 }
 
+// Options are the encoding and decoding parameters.
+type Options struct {
+	ColorModel color.Model
+}
+
 // DecodeConfig returns the color model and dimensions of a JPEG/XR image without
 // decoding the entire image.
 func DecodeConfig(r io.Reader) (config image.Config, err error) {
@@ -82,7 +87,7 @@ func DecodeConfig(r io.Reader) (config image.Config, err error) {
 }
 
 // Decode reads a JPEG/XR image from r and returns it as an image.Image.
-func Decode(r io.Reader) (m image.Image, err error) {
+func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return
@@ -170,33 +175,36 @@ func Decode(r io.Reader) (m image.Image, err error) {
 	return
 }
 
-func encode(w io.Writer, m image.Image, opt interface{}) error {
-	return Encode(w, m)
+func imageDecode(r io.Reader) (image.Image, error) {
+	return Decode(r, nil)
+}
+
+func imageExtDecode(r io.Reader, opt interface{}) (image.Image, error) {
+	if opt, ok := opt.(*Options); ok {
+		return Decode(r, opt)
+	} else {
+		return Decode(r, nil)
+	}
+}
+
+func imageExtEncode(w io.Writer, m image.Image, opt interface{}) error {
+	if opt, ok := opt.(*Options); ok {
+		return Encode(w, m, opt)
+	} else {
+		return Encode(w, m, nil)
+	}
 }
 
 func init() {
-	image.RegisterFormat("jxr", "II\xBC\x00", Decode, DecodeConfig)
-	image.RegisterFormat("jxr", "II\xBC\x01", Decode, DecodeConfig)
+	image.RegisterFormat("jxr", "II\xBC\x00", imageDecode, DecodeConfig)
+	image.RegisterFormat("jxr", "II\xBC\x01", imageDecode, DecodeConfig)
 
-	image_ext.RegisterFormat(
-		"jxr", "II\xBC\x00",
-		Decode, DecodeConfig,
-		encode,
-	)
-	image_ext.RegisterFormat(
-		"jxr", "II\xBC\x01",
-		Decode, DecodeConfig,
-		encode,
-	)
-
-	image_ext.RegisterFormat(
-		"wdp", "II\xBC\x00",
-		Decode, DecodeConfig,
-		encode,
-	)
-	image_ext.RegisterFormat(
-		"wdp", "II\xBC\x01",
-		Decode, DecodeConfig,
-		encode,
-	)
+	image_ext.RegisterFormat(image_ext.Format{
+		Name:         "jxr",
+		Extensions:   []string{".jxr", ".wdp"},
+		Magics:       []string{"II\xBC\x00", "II\xBC\x01"},
+		DecodeConfig: DecodeConfig,
+		Decode:       imageExtDecode,
+		Encode:       imageExtEncode,
+	})
 }
