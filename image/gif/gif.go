@@ -14,6 +14,7 @@ import (
 	"io"
 
 	image_ext "github.com/chai2010/gopkg/image"
+	"github.com/chai2010/gopkg/image/convert"
 )
 
 // Options are the encoding and decoding parameters.
@@ -30,8 +31,14 @@ func DecodeConfig(r io.Reader) (config image.Config, err error) {
 
 // Decode reads a GIF image from r and returns the first embedded
 // image as an image.Image.
-func Decode(r io.Reader, opt *Options) (image.Image, error) {
-	return gif.Decode(r)
+func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
+	if m, err = gif.Decode(r); err != nil {
+		return
+	}
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
+	return
 }
 
 // DecodeAll reads a GIF image from r and returns the sequential frames
@@ -48,6 +55,9 @@ func EncodeAll(w io.Writer, g *gif.GIF) error {
 
 // Encode writes the Image m to w in GIF format.
 func Encode(w io.Writer, m image.Image, opt *Options) error {
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
 	if opt != nil && opt.Options != nil {
 		return gif.Encode(w, m, opt.Options)
 	} else {

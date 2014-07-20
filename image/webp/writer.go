@@ -10,10 +10,14 @@ import (
 	"io"
 
 	image_ext "github.com/chai2010/gopkg/image"
+	"github.com/chai2010/gopkg/image/convert"
 )
 
 // Encode writes the image m to w in WEBP format.
 func Encode(w io.Writer, m image.Image, opt *Options) (err error) {
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
 	var output []byte
 	if opt != nil && opt.Lossless {
 		switch m := adjustImage(m).(type) {

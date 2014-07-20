@@ -15,6 +15,7 @@ import (
 	"github.com/chai2010/gopkg/builtin"
 	image_ext "github.com/chai2010/gopkg/image"
 	color_ext "github.com/chai2010/gopkg/image/color"
+	"github.com/chai2010/gopkg/image/convert"
 )
 
 const (
@@ -171,6 +172,9 @@ func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
 	if m == nil {
 		err = fmt.Errorf("jxr: Decode, unsupported colot model: %T", config.ColorModel)
 		return
+	}
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
 	}
 	return
 }

@@ -12,6 +12,7 @@ import (
 
 	image_ext "github.com/chai2010/gopkg/image"
 	color_ext "github.com/chai2010/gopkg/image/color"
+	"github.com/chai2010/gopkg/image/convert"
 )
 
 const DefaulQuality = 90
@@ -54,11 +55,17 @@ func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
 	if err != nil {
 		return
 	}
-	if hasAlpha {
-		return DecodeRGBA(data)
+	if opt != nil && opt.ColorModel == color.GrayModel {
+		m, err = DecodeGray(data)
+	} else if hasAlpha {
+		m, err = DecodeRGBA(data)
 	} else {
-		return DecodeRGB(data)
+		m, err = DecodeRGB(data)
 	}
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
+	return
 }
 
 func imageDecode(r io.Reader) (image.Image, error) {

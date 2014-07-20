@@ -14,6 +14,7 @@ import (
 
 	"code.google.com/p/go.image/bmp"
 	image_ext "github.com/chai2010/gopkg/image"
+	"github.com/chai2010/gopkg/image/convert"
 )
 
 // Options are the encoding and decoding parameters.
@@ -30,12 +31,21 @@ func DecodeConfig(r io.Reader) (config image.Config, err error) {
 
 // Decode reads a BMP image from r and returns it as an image.Image.
 // Limitation: The file must be 8 or 24 bits per pixel.
-func Decode(r io.Reader, opt *Options) (image.Image, error) {
-	return bmp.Decode(r)
+func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
+	if m, err = bmp.Decode(r); err != nil {
+		return
+	}
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
+	return
 }
 
 // Encode writes the image m to w in BMP format.
 func Encode(w io.Writer, m image.Image, opt *Options) error {
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
 	return bmp.Encode(w, m)
 }
 

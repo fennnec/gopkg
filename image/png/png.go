@@ -14,6 +14,7 @@ import (
 	"io"
 
 	image_ext "github.com/chai2010/gopkg/image"
+	"github.com/chai2010/gopkg/image/convert"
 )
 
 const pngHeader = "\x89PNG\r\n\x1a\n"
@@ -31,14 +32,23 @@ func DecodeConfig(r io.Reader) (config image.Config, err error) {
 
 // Decode reads a PNG image from r and returns it as an image.Image.
 // The type of Image returned depends on the PNG contents.
-func Decode(r io.Reader, opt *Options) (image.Image, error) {
-	return png.Decode(r)
+func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
+	if m, err = png.Decode(r); err != nil {
+		return
+	}
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
+	return
 }
 
 // Encode writes the Image m to w in PNG format.
 // Any Image may be encoded, but images that are not image.NRGBA
 // might be encoded lossily.
 func Encode(w io.Writer, m image.Image, opt *Options) error {
+	if opt != nil && opt.ColorModel != nil {
+		m = convert.ColorModel(m, opt.ColorModel)
+	}
 	return png.Encode(w, m)
 }
 

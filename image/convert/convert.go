@@ -6,12 +6,48 @@
 package convert
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 
 	image_ext "github.com/chai2010/gopkg/image"
 	color_ext "github.com/chai2010/gopkg/image/color"
 )
+
+func ColorModel(m image.Image, model color.Model) image.Image {
+	if model == nil {
+		return m
+	}
+	switch model {
+	case color.GrayModel:
+		return Gray(m)
+	case color.Gray16Model:
+		return Gray16(m)
+	case color_ext.Gray32fModel:
+		return Gray32f(m)
+	case color_ext.RGBModel:
+		return RGB(m)
+	case color_ext.RGB48Model:
+		return RGB48(m)
+	case color_ext.RGB96fModel:
+		return RGB96f(m)
+	case color.RGBAModel:
+		return RGBA(m)
+	case color.RGBA64Model:
+		return RGBA64(m)
+	case color_ext.RGBA128fModel:
+		return RGBA128f(m)
+	}
+	panic(fmt.Sprintf("image/convert: unsupport colorModel %T", model))
+}
+
+func Color(m image.Image, isColor bool) image.Image {
+	if isColor {
+		return convertToColor(m)
+	} else {
+		return convertToGray(m)
+	}
+}
 
 func Gray(m image.Image) *image.Gray {
 	if gray, ok := m.(*image.Gray); ok {
@@ -425,14 +461,6 @@ func YCbCr(m image.Image, subsampleRatio image.YCbCrSubsampleRatio) *image.YCbCr
 		}
 	}
 	return (*image.YCbCr)(yCbCr)
-}
-
-func Color(m image.Image, isColor bool) image.Image {
-	if isColor {
-		return convertToColor(m)
-	} else {
-		return convertToGray(m)
-	}
 }
 
 func convertToColor(m image.Image) image.Image {
