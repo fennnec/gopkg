@@ -2,77 +2,80 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package webp
+package rawp
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"io"
 	"io/ioutil"
 
+	"code.google.com/p/snappy-go/snappy"
 	image_ext "github.com/chai2010/gopkg/image"
-	color_ext "github.com/chai2010/gopkg/image/color"
 	"github.com/chai2010/gopkg/image/convert"
 )
 
-const DefaulQuality = 90
-
-// Options are the encoding parameters.
 type Options struct {
 	ColorModel color.Model
-	Lossless   bool
-	Quality    float32 // 0 ~ 100
+	UseSnappy  bool // 0=disabled, 1=enabled (RawPHeader.Data)
 }
 
-// DecodeConfig returns the color model and dimensions of a WEBP image without
-// decoding the entire image.
 func DecodeConfig(r io.Reader) (config image.Config, err error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return
 	}
-	width, height, hasAlpha, err := GetInfo(data)
+	hdr, err := rawpDecodeHeader(data)
 	if err != nil {
 		return
 	}
-	config.Width = width
-	config.Height = height
-	if hasAlpha {
-		config.ColorModel = color.RGBAModel
-	} else {
-		config.ColorModel = color_ext.RGBModel
+
+	model, err := rawpColorModel(hdr)
+	if err != nil {
+		return
 	}
+
+	config = image.Config{model, int(hdr.Width), int(hdr.Height)}
 	return
 }
 
-// Decode reads a WEBP image from r and returns it as an image.Image.
 func Decode(r io.Reader, opt *Options) (m image.Image, err error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return
 	}
-	_, _, hasAlpha, err := GetInfo(data)
+	hdr, err := rawpDecodeHeader(data)
 	if err != nil {
 		return
 	}
 
-	if opt != nil && opt.ColorModel == color.GrayModel {
-		m, err = DecodeGray(data)
-	} else if opt != nil && opt.ColorModel == color_ext.RGBModel {
-		m, err = DecodeRGB(data)
-	} else if opt != nil && opt.ColorModel == color.RGBAModel {
-		m, err = DecodeRGBA(data)
-	} else if hasAlpha {
-		m, err = DecodeRGBA(data)
-	} else {
-		m, err = DecodeRGB(data)
-	}
+	// new decoder
+	decoder, err := rawpPixDecoder(hdr)
 	if err != nil {
 		return
 	}
+
+	// decode snappy
+	pix := hdr.Data
+	if hdr.UseSnappy != 0 {
+		if pix, err = snappy.Decode(nil, hdr.Data); err != nil {
+			err = fmt.Errorf("image/rawp: Decode, snappy err: %v", err)
+			return
+		}
+	}
+
+	// decode raw pix
+	m, err = decoder.Decode(pix, nil)
+	if err != nil {
+		return
+	}
+
+	// convert color model
 	if opt != nil && opt.ColorModel != nil {
 		m = convert.ColorModel(m, opt.ColorModel)
 	}
+
 	return
 }
 
@@ -97,12 +100,12 @@ func imageExtEncode(w io.Writer, m image.Image, opt interface{}) error {
 }
 
 func init() {
-	image.RegisterFormat("webp", "RIFF????WEBPVP8 ", imageDecode, DecodeConfig)
+	image.RegisterFormat("rawp", "RAWP\x1B\xF2\x38\x0A", imageDecode, DecodeConfig)
 
 	image_ext.RegisterFormat(image_ext.Format{
-		Name:         "webp",
-		Extensions:   []string{".webp"},
-		Magics:       []string{"RIFF????WEBPVP8 "},
+		Name:         "rawp",
+		Extensions:   []string{".rawp"},
+		Magics:       []string{"RAWP\x1B\xF2\x38\x0A"}, // rawSig + rawpMagic
 		DecodeConfig: DecodeConfig,
 		Decode:       imageExtDecode,
 		Encode:       imageExtEncode,
