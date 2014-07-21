@@ -3,6 +3,25 @@
 // license that can be found in the LICENSE file.
 
 // Package rawp implements a decoder and encoder for RawP images.
+//
+// RawP Image Structs (Little Endian):
+//	type RawPImage struct {
+//		Sig          [4]byte // 4Bytes, WEWP
+//		Magic        uint32  // 4Bytes, 0x1BF2380A
+//		Width        uint16  // 2Bytes, image Width
+//		Height       uint16  // 2Bytes, image Height
+//		Channels     byte    // 1Bytes, 1=Gray, 3=RGB, 4=RGBA
+//		Depth        byte    // 1Bytes, 8/16/32/64 bits
+//		DataType     byte    // 1Bytes, 1=Uint, 2=Int, 3=Float
+//		UseSnappy    byte    // 1Bytes, 0=disabled, 1=enabled (RawPImage.Data)
+//		DataSize     uint32  // 4Bytes, image data size (RawPImage.Data)
+//		DataCheckSum uint32  // 4Bytes, CRC32(RawPImage.Data[RawPImage.DataSize])
+//		Data         []byte  // ?Bytes, image data (RawPImage.DataSize)
+//	}
+//
+// Please report bugs to chaishushan{AT}gmail.com.
+//
+// Thanks!
 package rawp
 
 import (
@@ -25,13 +44,13 @@ const (
 
 // data type
 const (
-	DataType_UInt  = 1
-	DataType_Int   = 2
-	DataType_Float = 3
+	rawpDataType_UInt  = 1
+	rawpDataType_Int   = 2
+	rawpDataType_Float = 3
 )
 
 // RawP Image Spec (Little Endian), 24Bytes.
-type Header struct {
+type rawpHeader struct {
 	Sig          [4]byte // 4Bytes, WEWP
 	Magic        uint32  // 4Bytes, 0x1BF2380A
 	Width        uint16  // 2Bytes, image Width
@@ -45,9 +64,9 @@ type Header struct {
 	Data         []byte  // ?Bytes, image data (RawPHeader.DataSize)
 }
 
-func (p *Header) String() string {
+func (p *rawpHeader) String() string {
 	return fmt.Sprintf(`
-image/rawp.Header{
+image/rawp.rawpHeader{
 	Sig:          %q
 	Magic:        0x%x
 	Width:        %d
@@ -83,10 +102,10 @@ func rawpIsValidDepth(depth byte) bool {
 }
 
 func rawpIsValidDataType(t byte) bool {
-	return t == DataType_UInt || t == DataType_Int || t == DataType_Float
+	return t == rawpDataType_UInt || t == rawpDataType_Int || t == rawpDataType_Float
 }
 
-func rawpIsValidHeader(hdr *Header) error {
+func rawpIsValidHeader(hdr *rawpHeader) error {
 	if string(hdr.Sig[:]) != rawpSig {
 		return fmt.Errorf("image/rawp: bad Sig, %v", hdr.Sig)
 	}
@@ -116,7 +135,7 @@ func rawpIsValidHeader(hdr *Header) error {
 
 	// check type more ...
 	if hdr.Depth == 8 || hdr.Depth == 16 {
-		if hdr.DataType == DataType_Float {
+		if hdr.DataType == rawpDataType_Float {
 			return fmt.Errorf("image/rawp: bad Depth, %v", hdr.Depth)
 		}
 	}
@@ -145,44 +164,44 @@ func rawpIsValidHeader(hdr *Header) error {
 	return nil
 }
 
-func rawpColorModel(hdr *Header) (color.Model, error) {
+func rawpColorModel(hdr *rawpHeader) (color.Model, error) {
 	switch {
 	case hdr.Channels == 1:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			return color.GrayModel, nil
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			return color.Gray16Model, nil
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			return color_ext.Gray32fModel, nil
 		}
 	case hdr.Channels == 3:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			return color_ext.RGBModel, nil
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			return color_ext.RGB48Model, nil
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			return color_ext.RGB96fModel, nil
 		}
 	case hdr.Channels == 4:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			return color.RGBAModel, nil
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			return color.RGBA64Model, nil
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			return color_ext.RGBA128fModel, nil
 		}
 	}
 	return nil, fmt.Errorf("image/rawp: unsupport color model, hdr = %v", hdr)
 }
 
-func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
+func rawpPixDecoder(hdr *rawpHeader) (decoder *pixDecoder, err error) {
 	switch {
 	case hdr.Channels == 1:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint8,
@@ -190,7 +209,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 				Height:   int(hdr.Height),
 			}
 			return
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint16,
@@ -198,7 +217,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 				Height:   int(hdr.Height),
 			}
 			return
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Float32,
@@ -209,7 +228,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 		}
 	case hdr.Channels == 3:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint8,
@@ -217,7 +236,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 				Height:   int(hdr.Height),
 			}
 			return
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint16,
@@ -225,7 +244,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 				Height:   int(hdr.Height),
 			}
 			return
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Float32,
@@ -236,7 +255,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 		}
 	case hdr.Channels == 4:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint8,
@@ -244,7 +263,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 				Height:   int(hdr.Height),
 			}
 			return
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint16,
@@ -252,7 +271,7 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 				Height:   int(hdr.Height),
 			}
 			return
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			decoder = &pixDecoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Float32,
@@ -265,23 +284,23 @@ func rawpPixDecoder(hdr *Header) (decoder *pixDecoder, err error) {
 	return nil, fmt.Errorf("image/rawp: unsupport color model, hdr = %v", hdr)
 }
 
-func rawpPixEncoder(hdr *Header) (encoder *pixEncoder, err error) {
+func rawpPixEncoder(hdr *rawpHeader) (encoder *pixEncoder, err error) {
 	switch {
 	case hdr.Channels == 1:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint8,
 			}
 			return
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint16,
 			}
 			return
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Float32,
@@ -290,19 +309,19 @@ func rawpPixEncoder(hdr *Header) (encoder *pixEncoder, err error) {
 		}
 	case hdr.Channels == 3:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint8,
 			}
 			return
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint16,
 			}
 			return
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Float32,
@@ -311,19 +330,19 @@ func rawpPixEncoder(hdr *Header) (encoder *pixEncoder, err error) {
 		}
 	case hdr.Channels == 4:
 		switch {
-		case hdr.Depth == 8 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 8 && hdr.DataType == rawpDataType_UInt:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint8,
 			}
 			return
-		case hdr.Depth == 16 && hdr.DataType == DataType_UInt:
+		case hdr.Depth == 16 && hdr.DataType == rawpDataType_UInt:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Uint16,
 			}
 			return
-		case hdr.Depth == 32 && hdr.DataType == DataType_Float:
+		case hdr.Depth == 32 && hdr.DataType == rawpDataType_Float:
 			encoder = &pixEncoder{
 				Channels: int(hdr.Channels),
 				DataType: reflect.Float32,
@@ -334,7 +353,7 @@ func rawpPixEncoder(hdr *Header) (encoder *pixEncoder, err error) {
 	return nil, fmt.Errorf("image/rawp: unsupport color model, hdr = %v", hdr)
 }
 
-func rawpMakeHeader(width, height int, model color.Model, useSnappy bool) (hdr *Header, err error) {
+func rawpMakeHeader(width, height int, model color.Model, useSnappy bool) (hdr *rawpHeader, err error) {
 	if width <= 0 || width > math.MaxUint16 {
 		err = fmt.Errorf("image/rawp: image size overflow: width = %v, height = %v", width, height)
 		return
@@ -344,7 +363,7 @@ func rawpMakeHeader(width, height int, model color.Model, useSnappy bool) (hdr *
 		return
 	}
 
-	hdr = &Header{
+	hdr = &rawpHeader{
 		Sig:    [4]byte{'R', 'A', 'W', 'P'},
 		Magic:  rawpMagic,
 		Width:  uint16(width),
@@ -358,60 +377,60 @@ func rawpMakeHeader(width, height int, model color.Model, useSnappy bool) (hdr *
 	case color.GrayModel:
 		hdr.Channels = 1
 		hdr.Depth = 8
-		hdr.DataType = DataType_UInt
+		hdr.DataType = rawpDataType_UInt
 		return
 	case color.Gray16Model:
 		hdr.Channels = 1
 		hdr.Depth = 16
-		hdr.DataType = DataType_UInt
+		hdr.DataType = rawpDataType_UInt
 		return
 	case color_ext.Gray32fModel:
 		hdr.Channels = 1
 		hdr.Depth = 32
-		hdr.DataType = DataType_Float
+		hdr.DataType = rawpDataType_Float
 		return
 	case color_ext.RGBModel:
 		hdr.Channels = 3
 		hdr.Depth = 8
-		hdr.DataType = DataType_UInt
+		hdr.DataType = rawpDataType_UInt
 		return
 	case color_ext.RGB48Model:
 		hdr.Channels = 3
 		hdr.Depth = 16
-		hdr.DataType = DataType_UInt
+		hdr.DataType = rawpDataType_UInt
 		return
 	case color_ext.RGB96fModel:
 		hdr.Channels = 3
 		hdr.Depth = 32
-		hdr.DataType = DataType_Float
+		hdr.DataType = rawpDataType_Float
 		return
 	case color.RGBAModel:
 		hdr.Channels = 4
 		hdr.Depth = 8
-		hdr.DataType = DataType_UInt
+		hdr.DataType = rawpDataType_UInt
 		return
 	case color.RGBA64Model:
 		hdr.Channels = 4
 		hdr.Depth = 16
-		hdr.DataType = DataType_UInt
+		hdr.DataType = rawpDataType_UInt
 		return
 	case color_ext.RGBA128fModel:
 		hdr.Channels = 4
 		hdr.Depth = 32
-		hdr.DataType = DataType_Float
+		hdr.DataType = rawpDataType_Float
 		return
 	}
 	return nil, fmt.Errorf("image/rawp: unsupport color model, %T", model)
 }
 
-func rawpDecodeHeader(data []byte) (hdr *Header, err error) {
+func rawpDecodeHeader(data []byte) (hdr *rawpHeader, err error) {
 	if len(data) < rawpHeaderSize {
 		err = fmt.Errorf("image/rawp: bad header.")
 		return
 	}
 
 	// reader header
-	hdr = new(Header)
+	hdr = new(rawpHeader)
 	copy(((*[1 << 30]byte)(unsafe.Pointer(hdr)))[:rawpHeaderSize], data)
 	hdr.Data = data[rawpHeaderSize:]
 

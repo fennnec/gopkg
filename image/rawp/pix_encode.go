@@ -54,7 +54,7 @@ func (p *pixEncoder) Encode(m image.Image, buf []byte) (data []byte, err error) 
 	}
 
 	// Unknown
-	err = fmt.Errorf("image/raw: Encode, unknown image format, channels = %v, dataType = %v", p.Channels, p.DataType)
+	err = fmt.Errorf("image/rawp: Encode, unknown image format, channels = %v, dataType = %v", p.Channels, p.DataType)
 	return
 }
 

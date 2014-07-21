@@ -18,7 +18,7 @@ import (
 
 type Options struct {
 	ColorModel color.Model
-	UseSnappy  bool // 0=disabled, 1=enabled (RawPHeader.Data)
+	UseSnappy  bool
 }
 
 func DecodeConfig(r io.Reader) (config image.Config, err error) {
