@@ -6,6 +6,8 @@
 package unqlite
 
 /*
+#cgo freebsd linux darwin CFLAGS: -DUNQLITE_ENABLE_THREADS=1
+#cgo freebsd linux darwin LDFLAGS: -lpthread
 #include <stdlib.h>
 #include "unqlite.h"
 */
