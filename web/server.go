@@ -141,6 +141,11 @@ func (s *Server) Run(addr string) {
 	s.initServer()
 
 	mux := http.NewServeMux()
+	if s.Config.StaticDir != "" {
+		mux.Handle("/static/files/", http.StripPrefix("/static/files/",
+			http.FileServer(http.Dir(s.Config.StaticDir+"/files")),
+		))
+	}
 	if s.Config.Profiler {
 		mux.Handle("/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
 		mux.Handle("/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
