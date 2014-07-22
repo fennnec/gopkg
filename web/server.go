@@ -25,12 +25,13 @@ import (
 
 // ServerConfig is configuration for server objects.
 type ServerConfig struct {
-	StaticDir    string
-	Addr         string
-	Port         int
-	CookieSecret string
-	RecoverPanic bool
-	Profiler     bool
+	StaticDir         string
+	StaticFilesServer bool // FilesServerRoot: StaticDir + "/files"
+	Addr              string
+	Port              int
+	CookieSecret      string
+	RecoverPanic      bool
+	Profiler          bool
 }
 
 // Server represents a web.go server.
@@ -141,7 +142,7 @@ func (s *Server) Run(addr string) {
 	s.initServer()
 
 	mux := http.NewServeMux()
-	if s.Config.StaticDir != "" {
+	if s.Config.StaticFilesServer && s.Config.StaticDir != "" {
 		mux.Handle("/static/files/", http.StripPrefix("/static/files/",
 			http.FileServer(http.Dir(s.Config.StaticDir+"/files")),
 		))
