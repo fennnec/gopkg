@@ -55,8 +55,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chai2010/gopkg/encoding/base58"
-	"github.com/chai2010/gopkg/encoding/ini"
+	"github.com/chai2010/encoding/base58"
+	"github.com/chai2010/encoding/ini"
 )
 
 const (

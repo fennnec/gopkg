@@ -13,8 +13,8 @@ import (
 	"image/jpeg"
 	"io"
 
-	image_ext "github.com/chai2010/gopkg/image"
-	"github.com/chai2010/gopkg/image/convert"
+	image_ext "github.com/chai2010/image"
+	"github.com/chai2010/image/convert"
 )
 
 // Options are the encoding and decoding parameters.

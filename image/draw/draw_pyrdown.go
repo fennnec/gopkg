@@ -8,7 +8,7 @@ import (
 	"image"
 	"image/draw"
 
-	image_ext "github.com/chai2010/gopkg/image"
+	image_ext "github.com/chai2010/image"
 )
 
 type Filter int
