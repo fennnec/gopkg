@@ -12,10 +12,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/chai2010/gopkg/builtin"
-	image_ext "github.com/chai2010/gopkg/image"
-	color_ext "github.com/chai2010/gopkg/image/color"
-	"github.com/chai2010/gopkg/image/convert"
+	"github.com/chai2010/builtin"
+	image_ext "github.com/chai2010/image"
+	color_ext "github.com/chai2010/image/color"
+	"github.com/chai2010/image/convert"
 )
 
 const (
