@@ -14,7 +14,7 @@ import (
 
 	"github.com/chai2010/builtin"
 	image_ext "github.com/chai2010/image"
-	color_ext "github.com/chai2010/image/color"
+	color_ext "github.com/chai2010/image/image_color"
 	"github.com/chai2010/image/convert"
 )
 
