@@ -9,7 +9,7 @@ import (
 	"image"
 	"io"
 
-	"github.com/chai2010/gopkg/image/convert"
+	"github.com/chai2010/image/convert"
 )
 
 // Encode writes the image m to w in JPEG/XR format.
